@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SedeController;
 use App\Http\Controllers\SocioController;
 use App\Http\Controllers\PlanController;
+use App\Http\Controllers\ClaseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,5 +55,8 @@ Route::prefix('api')->group(function () {
     
     // Автоматические CRUD маршруты для Тарифов/Абонементов (Plan)
     Route::apiResource('plans', PlanController::class);
+
+    // Автоматические CRUD маршруты для Занятий (Clase)
+    Route::apiResource('clases', ClaseController::class);
     
 });
