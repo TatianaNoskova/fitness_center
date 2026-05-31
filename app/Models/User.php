@@ -50,4 +50,28 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Проверка роли пользователя (для RBAC)
+     */
+    public function hasRole(string $role): bool
+    {
+        // Приводим к нижнему регистру, чтобы избежать ошибок с 'Socio' vs 'socio'
+        return strtolower($this->rol) === strtolower($role);
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('admin') || $this->hasRole('administrador');
+    }
+
+    public function isCoach(): bool
+    {
+        return $this->hasRole('coach') || $this->hasRole('entrenador');
+    }
+
+    public function isSocio(): bool
+    {
+        return $this->hasRole('socio');
+    }
 }

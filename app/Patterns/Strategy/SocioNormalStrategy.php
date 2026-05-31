@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Strategies;
+namespace App\Patterns\Strategy;
 
 class SocioNormalStrategy implements CuotaStrategy
 {

@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Patterns\Composite\ClaseComponent;
 
-class Clase extends Model
+class Clase extends Model implements ClaseComponent
 {
     use HasFactory;
 
@@ -29,6 +31,11 @@ class Clase extends Model
         // Композиция: у одного занятия много записей
         return $this->hasMany(Inscripcion::class, 'clase_id');
     }
+
+    public function socios()
+{
+    return $this->belongsToMany(Socio::class, 'clase_socio', 'clase_id', 'socio_id', 'id', 'user_id');
+}
 
     /**
      * Методы из UML-диаграммы
@@ -62,4 +69,24 @@ class Clase extends Model
         // Если записавшихся меньше, чем емкость (capacidad), значит места есть
         return $anotados < $this->capacidad;
     }
+
+    /**
+     * Реализация метода из интерфейса ClaseComponent (Паттерн Composite)
+     */
+    public function getNombre(): string
+    {
+        // Если поле nombre в базе пустое, отдаем дефолтное имя
+        return $this->nombre ?? 'Clase sin nombre';
+    }
+
+    /**
+     * Реализация метода из интерфейса ClaseComponent (Паттерн Composite)
+     */
+    public function getCapacidad(): int
+    {
+        // Приводим к числу, чтобы PHP не ругался на тип данных
+        return (int)($this->capacidad ?? 0);
+    }
+
+
 }

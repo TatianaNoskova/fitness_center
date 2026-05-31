@@ -15,11 +15,11 @@ return new class extends Migration
         $table->id(); // Это id_persona
         $table->string('nombre', 50);
         $table->string('apellido', 50);
-        $table->string('dni', 20)->unique(); // Исправил 'din' на 'dni'
+        $table->string('dni', 20)->unique() ->nullable();
         $table->string('telefono', 20)->nullable();
         $table->string('email')->unique();
         $table->string('password');
-        $table->enum('rol', ['ADMINISTRADOR', 'ENTRENADOR', 'SOCIO']);
+        $table->enum('rol', ['administrador', 'entrenador', 'socio']);
         $table->rememberToken();
         $table->timestamps();
     });

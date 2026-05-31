@@ -102,4 +102,63 @@ class ClaseController extends Controller
 
         return response()->json(['message' => 'Clase eliminada con éxito'], Response::HTTP_OK);
     }
+
+    /**
+     * Симуляция записи клиента на занятие
+     */
+    /**
+     * Симуляция записи клиента на занятие
+     */
+    public function inscribir(string $id)
+    {
+        try {
+            $clase = Clase::findOrFail($id);
+            
+            // Ищем текущего авторизованного клиента
+            $socio = \App\Models\Socio::where('user_id', auth()->id())->first();
+            
+            if (!$socio) {
+                return redirect()->back()->with('error', 'No tienes un perfil de socio activo.');
+            }
+
+            // Вызываем бизнес-метод (он внутри себя проверит дубликаты и вместимость)
+            $socio->inscribirseAClase($clase);
+
+            // Ура! Запись прошла успешно. 
+            // ВАЖНО: Уменьшаем количество доступных мест в базе данных на 1
+            $clase->decrement('capacidad');
+
+            return redirect()->back()->with('success', "¡Inscripción exitosa! Te has inscrito en {$clase->nombre}.");
+
+        } catch (\Exception $e) {
+            // Если сработал throw new \Exception из модели Socio (уже записан / нет мест),
+            // мы НЕ возвращаем JSON, а перенаправляем назад с флагом ошибки!
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function cancelar(string $id)
+{
+    try {
+        $clase = Clase::findOrFail($id);
+        
+        // Ищем текущего клиента
+        $socio = \App\Models\Socio::where('user_id', auth()->id())->first();
+        
+        if (!$socio) {
+            return redirect()->back()->with('error', 'No tienes un perfil de socio activo.');
+        }
+
+        // Вызываем метод отмены
+        $socio->cancelarInscripcion($clase);
+
+        // ВАЖНО: Возвращаем 1 свободное место занятию!
+        $clase->increment('capacidad');
+
+        return redirect()->back()->with('success', "Has cancelado tu inscripción de: {$clase->nombre}.");
+
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', $e->getMessage());
+    }
 }
+} 
