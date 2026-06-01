@@ -5,9 +5,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Patterns\Composite\ClaseComponent;
 
-class Clase extends Model implements ClaseComponent
+
+class Clase extends Model
 {
     use HasFactory;
 
@@ -70,23 +70,7 @@ class Clase extends Model implements ClaseComponent
         return $anotados < $this->capacidad;
     }
 
-    /**
-     * Реализация метода из интерфейса ClaseComponent (Паттерн Composite)
-     */
-    public function getNombre(): string
-    {
-        // Если поле nombre в базе пустое, отдаем дефолтное имя
-        return $this->nombre ?? 'Clase sin nombre';
-    }
 
-    /**
-     * Реализация метода из интерфейса ClaseComponent (Паттерн Composite)
-     */
-    public function getCapacidad(): int
-    {
-        // Приводим к числу, чтобы PHP не ругался на тип данных
-        return (int)($this->capacidad ?? 0);
-    }
 
 
 }

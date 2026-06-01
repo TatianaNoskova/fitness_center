@@ -108,23 +108,26 @@
                     <p class="text-slate-500">Bienvenido, {{ auth()->user()->nombre }}. Aquí puedes gestionar tus entrenamientos y pagos.</p>
                 </div>
 
-                @if(session()->has('alerta_clase_cancelada'))
-                <div class="mb-6 bg-rose-50 border-l-4 border-rose-500 p-4 rounded-r-2xl shadow-sm animate-pulse">
-                    <div class="flex items-start">
-                        <div class="flex-shrink-0">
-                            <i class="bi bi-exclamation-triangle-fill text-rose-500 text-lg"></i>
-                        </div>
-                        <div class="ml-3">
-                            <h3 class="text-sm font-bold text-rose-800 uppercase tracking-wide">
-                                Aviso Importante del Gimnasio (Observer Activo)
-                            </h3>
-                            <div class="mt-1 text-sm text-rose-700 font-medium">
-                                {{ session('alerta_clase_cancelada') }}
+                {{-- ПРОВЕРЯЕМ ГЛОБАЛЬНЫЙ КЭШ ОТ ОБСЕРВЕРА --}}
+                @if(\Illuminate\Support\Facades\Cache::has('alerta_clase_cancelada'))
+                    <div class="mb-6 bg-rose-50 border-l-4 border-rose-500 p-4 rounded-r-2xl shadow-sm">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-exclamation-triangle-fill text-rose-500 text-lg"></i>
+                            </div>
+                            <div class="ml-3 w-full flex justify-between items-start">
+                                <div>
+                                    <h3 class="text-sm font-bold text-rose-800 uppercase tracking-wide">
+                                        Aviso Importante del Gimnasio (Observer Activo)
+                                    </h3>
+                                    <div class="mt-1 text-sm text-rose-700 font-medium">
+                                        {{ \Illuminate\Support\Facades\Cache::get('alerta_clase_cancelada') }}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            @endif
+                @endif
                 
                 <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center space-x-4">
                     <div class="p-3 bg-[#d40839]/10 text-[#d40839] rounded-xl">

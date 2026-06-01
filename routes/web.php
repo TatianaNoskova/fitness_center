@@ -45,12 +45,14 @@ Route::middleware('auth')->group(function () {
         
         // Вьюшки для админки (Они пока берут данные напрямую, их можно будет при желании тоже причесать)
         Route::get('/sedes-view', function () { return view('admin.sedes', ['sedes' => \App\Models\Sede::with(['socios'])->get()]); });
-        Route::get('/plans-view', function () { return view('admin.planes', ['plans' => \App\Models\Plan::all()]); });
-        // При клике на кнопку вызываем метод index контроллера
-        Route::get('/clases-view', [AdminClaseController::class, 'index'])->name('admin.dashboard');
+        Route::get('/plans-view', [PlanController::class, 'index'])->name('plans.index');
+        Route::post('/plans-view/toggle/{servicioId}', [PlanController::class, 'toggleServicioEnCombo'])->name('composite.toggle');
+        
+        // Открытие списка занятий админом
+        Route::get('/clases-view', [\App\Http\Controllers\Admin\AdminClaseController::class, 'index'])->name('admin.clases.index');
 
-        // Этот роут будет обрабатывать удаление занятия
-        Route::delete('/admin/clases/{id}', [AdminClaseController::class, 'destroy'])->name('admin.clases.destroy');
+        // Удаление занятия админом
+        Route::delete('/admin/clases/{id}', [\App\Http\Controllers\Admin\AdminClaseController::class, 'destroy'])->name('admin.clases.destroy');
         
         // А вот список клиентов админа теперь берется через наш новый Admin\SocioController, если захочешь сделать там Blade-вывод
         Route::get('/socios-view', function () { return view('admin.socios', ['socios' => \App\Models\Socio::with(['user', 'sede'])->get()]); });

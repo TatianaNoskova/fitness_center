@@ -4,12 +4,12 @@ namespace App\Patterns\Composite;
 
 class ClaseComposite implements ClaseComponent
 {
-    protected string $nombreCurso;
+    protected string $nombreCombo;
     protected array $componentes = [];
 
-    public function __construct(string $nombreCurso)
+    public function __construct(string $nombreCombo)
     {
-        $this->nombreCurso = $nombreCurso;
+        $this->nombreCombo = $nombreCombo;
     }
 
     public function agregar(ClaseComponent $componente)
@@ -19,15 +19,16 @@ class ClaseComposite implements ClaseComponent
 
     public function getNombre(): string
     {
-        return $this->nombreCurso . " (Combo de " . count($this->componentes) . " clases)";
+        return $this->nombreCombo . " (Пакет из " . count($this->componentes) . " услуг)";
     }
 
-    public function getCapacidad(): int
+    public function getPrecio(): float
     {
-        $totalCapacidad = 0;
+        $totalPrecio = 0;
+        // Паттерн Composite обходит дерево и прозрачно суммирует цены
         foreach ($this->componentes as $componente) {
-            $totalCapacidad += $componente->getCapacidad();
+            $totalPrecio += $componente->getPrecio();
         }
-        return $totalCapacidad;
+        return $totalPrecio;
     }
 }

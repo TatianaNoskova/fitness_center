@@ -4,22 +4,18 @@ namespace App\Observers;
 
 use App\Models\Clase;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache; // Импортируем фасад кэша
 
 class ClaseObserver
 {
-    /**
-     * Срабатывает АВТОМАТИЧЕСКИ при удалении класса.
-     */
     public function deleted(Clase $clase)
     {
-        // Формируем понятное сообщение об отмене
-        $mensajeAviso = "¡ATENCIÓN! La clase de '{$clase->nombre}' programada para el el día {$clase->fecha} a las {$clase->hora} ha sido CANCELADA por la administración.";
+        $mensajeAviso = "¡ATENCIÓN! La clase de '{$clase->nombre}' programada para el día {$clase->fecha} ha sido CANCELADA por la administración.";
 
-        // Записываем в лог (для порядка)
+        // 1. Пишем в лог (для проверки в консоли)
         Log::warning("[OBSERVER] " . $mensajeAviso);
 
-        // Магия для браузера: сохраняем уведомление в глобальную сессию Laravel.
-        // Любой контроллер или Blade-шаблон сможет отобразить его при следующем запросе.
-        session()->flash('alerta_clase_cancelada', $mensajeAviso);
+        // 2. Сохраняем в глобальный кэш на 10 минут для всех пользователей
+        Cache::put('alerta_clase_cancelada', $mensajeAviso, now()->addMinutes(10));
     }
 }
