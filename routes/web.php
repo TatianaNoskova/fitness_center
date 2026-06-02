@@ -46,7 +46,13 @@ Route::middleware('auth')->group(function () {
         // Вьюшки для админки (Они пока берут данные напрямую, их можно будет при желании тоже причесать)
         Route::get('/sedes-view', function () { return view('admin.sedes', ['sedes' => \App\Models\Sede::with(['socios'])->get()]); });
         Route::get('/plans-view', [PlanController::class, 'index'])->name('plans.index');
-        Route::post('/plans-view/toggle/{servicioId}', [PlanController::class, 'toggleServicioEnCombo'])->name('composite.toggle');
+        // Route::post('/composite/toggle/{comboId}/{servicioId}', [App\Http\Controllers\PlanesController::class, 'toggleServicioEnCombo'])->name('composite.toggle');
+
+        Route::get('/admin/servicios-extras', function () {return view('admin.servicios_extras');})->name('composite.index');
+        // Все POST-запросы теперь обрабатывает ServicioExtraController
+        Route::post('/composite/toggle/{comboId}/{servicioId}', [\App\Http\Controllers\Admin\ServicioExtraController::class, 'toggleServicioEnCombo'])->name('composite.toggle');
+        Route::post('/composite/servicio/store', [\App\Http\Controllers\Admin\ServicioExtraController::class, 'storeServicio'])->name('composite.servicio.store');
+        Route::post('/composite/combo/store', [\App\Http\Controllers\Admin\ServicioExtraController::class, 'storeCombo'])->name('composite.combo.store');
         
         // Открытие списка занятий админом
         Route::get('/clases-view', [\App\Http\Controllers\Admin\AdminClaseController::class, 'index'])->name('admin.clases.index');
@@ -74,12 +80,19 @@ Route::middleware('auth')->group(function () {
     Route::post('/clases/{id}/inscribir', [App\Http\Controllers\ClaseController::class, 'inscribir']);
     Route::post('/clases/{id}/cancelar', [App\Http\Controllers\ClaseController::class, 'cancelar']);
     Route::post('/socio/pagar/{id}', [\App\Http\Controllers\Socio\DashboardController::class, 'pagarCuota'])->name('socio.pagar');
-    
+    // Внутри группы роутов для пользователей (socio)
+Route::post('/socio/contratar-extras', [\App\Http\Controllers\Socio\DashboardController::class, 'contratarExtras'])->name('socio.contratar-extras');
     });
+    Route::delete('/socio/cancelar-pago/{id}', [
+    \App\Http\Controllers\Socio\DashboardController::class, 
+    'cancelarPago'
+])->name('socio.cancelar-pago');
 
     // --- ОБЩАЯ БИЗНЕС-ЛОГИКА ---
     Route::post('/clases/{id}/inscribir', [ClaseController::class, 'inscribir'])->middleware('role:socio,entrenador');
 });
+
+
 
 
 /*

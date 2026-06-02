@@ -7,6 +7,9 @@ use App\Models\Socio;
 use App\Models\Clase;
 use App\Models\Sede; 
 use App\Models\Plan; 
+use App\Models\Combo;    // <-- ДОБАВИТЬ ЭТУ СТРОКУ
+use App\Models\Servicio; // <-- Рекомендую сразу добавить и её, если ниже используется Servicio
+use App\Models\Pago;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -17,6 +20,9 @@ class DashboardController extends Controller
         $socio = Socio::with(['sede', 'plan'])
             ->where('user_id', auth()->id())
             ->first();
+
+        $todosCombos = \App\Models\Combo::with('servicios')->get();
+        $todosServicios = \App\Models\Servicio::get();
 
         // Инициализируем переменные по умолчанию
         $clasesDisponibles = collect();
@@ -73,7 +79,9 @@ class DashboardController extends Controller
             'precioCuota',
             'historialPagos',
             'todosLosPlanes',
-            'todasLasSedes'
+            'todasLasSedes',
+            'todosCombos',     // <-- Передали в шаблон
+            'todosServicios'   // <-- Передали в шаблон
         ));
     }
 
@@ -161,4 +169,79 @@ class DashboardController extends Controller
             return redirect()->route('socio.dashboard')->with('error', $e->getMessage());
         }
     }
+
+
+    public function contratarExtras(Request $request)
+    {
+        // 1. Получаем массивы ID из формы
+        $comboIds = $request->input('combos', []);
+        $servicioIds = $request->input('servicios', []);
+
+        if (empty($comboIds) && empty($servicioIds)) {
+            return redirect()->back()->with('error', 'Por favor, selecciona al menos un servicio o combo.');
+        }
+
+        // 2. Ищем профиль socio
+        $socio = Socio::where('user_id', auth()->id())->first();
+
+        if (!$socio) {
+            return redirect()->back()->with('error', 'No se encontró el perfil de socio.');
+        }
+
+        // --- КЛЮЧЕВОЙ МОМЕНТ: СОЗДАЕМ ОТДЕЛЬНЫЕ СТРОЧКИ ---
+
+        // 3. Создаем отдельные платежи для каждой ОДИНОЧНОЙ услуги
+        if (!empty($servicioIds)) {
+            $servicios = Servicio::whereIn('id', $servicioIds)->get();
+            
+            foreach ($servicios as $servicio) {
+                Pago::create([
+                    'fecha'       => now()->toDateString(),
+                    'monto'       => $servicio->precio,
+                    'metodo_pago' => 'Efectivo/Tarjeta',
+                    'estado'      => 'PENDIENTE',
+                    'socio_id'    => $socio->user_id,
+                    'plan_id'     => null, // Это экстра-услуга, а не основной тариф, ставим null
+                    'detalles'    => "Servicio Extra: {$servicio->nombre}", // Опционально, если есть такое поле в БД
+                ]);
+            }
+        }
+
+        // 4. Создаем отдельные платежи для каждого КОМБО (суммируя его внутренности)
+        if (!empty($comboIds)) {
+            $combos = Combo::with('servicios')->whereIn('id', $comboIds)->get();
+            
+            foreach ($combos as $combo) {
+                $precioCombo = $combo->servicios->sum('precio');
+
+                Pago::create([
+                    'fecha'       => now()->toDateString(),
+                    'monto'       => $precioCombo,
+                    'metodo_pago' => 'Efectivo/Tarjeta',
+                    'estado'      => 'PENDIENTE',
+                    'socio_id'    => $socio->user_id,
+                    'plan_id'     => null, // Ставим null, чтобы не путать с основной абонентской платой
+                    'detalles'    => "Combo Extra: {$combo->nombre}", // Полезно для вывода в истории
+                ]);
+            }
+        }
+
+        return redirect()->route('socio.dashboard')->with('success', '¡Servicios extras añadidos a tu lista de pagos pendientes!');
+    }
+
+    public function cancelarPago($id)
+{
+    // Ищем платеж, принадлежащий именно текущему пользователю и со статусом PENDIENTE
+    $pago = Pago::where('id', $id)
+        ->where('socio_id', auth()->id())
+        ->where('estado', 'PENDIENTE')
+        ->first();
+
+    if ($pago) {
+        $pago->delete();
+        return redirect()->back()->with('success', 'El servicio extra fue cancelado correctamente.');
+    }
+
+    return redirect()->back()->with('error', 'No se pudo cancelar этот платеж.');
+}
 }

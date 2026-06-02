@@ -6,9 +6,7 @@
         <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Gestionar Clases (Занятия)</h1>
         <p class="text-slate-500 mt-1">Панель управления расписанием тренировок фитнес-центра.</p>
     </div>
-    <div class="text-xs font-bold text-slate-400 bg-slate-100 px-4 py-2 rounded-xl border border-slate-200">
-        <i class="bi bi-cpu-fill text-amber-500 mr-1"></i> OBSERVER PATTERN ACTIVE
-    </div>
+    
 </div>
 
 @if(session('success'))
@@ -20,35 +18,7 @@
     </div>
 @endif
 
-{{-- ==================== COMPOSITE PATTERN DISPLAY ==================== --}}
-<div class="mb-8 bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 p-6 rounded-2xl shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-    <div class="space-y-1">
-        <div class="flex items-center space-x-2">
-            <span class="bg-indigo-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-md uppercase tracking-wider">
-                <i class="bi bi-diagram-3-fill mr-1"></i> Composite Pattern Active
-            </span>
-            <h4 class="text-sm font-bold text-indigo-900 uppercase tracking-wide">
-                Módulo de Combos Promocionales (Estructura en Árbol)
-            </h4>
-        </div>
-        {{-- Динамический вызов метода getNombre() нашего Композита --}}
-        <p class="text-base font-bold text-slate-800 pt-1">
-            <i class="bi bi-box-seam text-indigo-500 mr-1.5"></i> {{ $comboCurso->getNombre() }}
-        </p>
-        <p class="text-xs text-slate-400">
-            Паттерн прозрачно группирует отдельные занятия (`Leaf`) в единый пакет (`Composite`), опрашивая дочерние элементы.
-        </p>
-    </div>
-    <div class="bg-white px-5 py-3 rounded-xl border border-indigo-100 text-center shadow-xs min-w-[140px]">
-        <span class="text-[10px] uppercase tracking-widest text-slate-400 font-bold block">Cupos Totales</span>
-        {{-- Динамический вызов метода getCapacidad() нашего Композита --}}
-        <span class="text-2xl font-black text-indigo-600">
-            {{ $comboCurso->getCapacidad() }}
-        </span>
-        <span class="text-xs text-slate-400 font-medium block">asistentes</span>
-    </div>
-</div>
-{{-- ==================== END COMPOSITE PATTERN ==================== --}}
+
 
 <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
     <div class="p-6 border-b border-slate-100">

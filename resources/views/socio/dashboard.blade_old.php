@@ -157,7 +157,7 @@
             {{-- Сетка колонок --}}
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
-                {{-- ЛЕВАЯ КОЛОНКА (Записи, Твои тарифы и Платежи) --}}
+                {{-- ==================== ЛЕВАЯ КОЛОНКА (Занимает 2/3 экрана) ==================== --}}
                 <div class="lg:col-span-2 space-y-10">
                     
                     {{-- ДИНАМИЧЕСКАЯ КАРТОЧКА СТРАТЕГИИ ТАРИФА (Новый блок преимуществ) --}}
@@ -184,7 +184,7 @@
                             <div class="text-sm">
                                 @if($socio->categoria === 'ESTUDIANTE')
                                     <p class="text-emerald-600 font-medium flex items-center">
-                                        <i class="bi bi-percent mr-1.5 text-lg"></i> Beneficio Estudiante aplicado: Se bonificó un 20% del valor del plan seleccionado.
+                                        <i class="bi bi-percent mr-1.5 text-lg"></i> Beneficio Estudiante applied: Se bonificó un 20% del valor del plan seleccionado.
                                     </p>
                                 @elseif($socio->categoria === 'VIP')
                                     <p class="text-amber-600 font-medium flex items-center">
@@ -202,7 +202,7 @@
                                 <h4 class="text-xs font-bold uppercase tracking-wider text-[#002d55] mb-2.5">Beneficios de tu suscripción activa:</h4>
                                 <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-medium text-slate-600">
                                     <li class="flex items-center text-emerald-600"><i class="bi bi-check-circle-fill mr-2"></i> Sala de musculación y cardio</li>
-                                    <li class="flex items-center text-emerald-600"><i class="bi bi-check-circle-fill mr-2"></i> Reserva de clases en Sede {{ $socio->sede->nombre }}</li>
+                                    <li class="flex items-center text-emerald-600"><i class="bi bi-check-circle-fill mr-2"></i> Reserva de clases en Sede {{ $socio->sede->nombre ?? '' }}</li>
                                     
                                     {{-- Дополнительные VIP плюшки --}}
                                     @if($socio->categoria === 'VIP')
@@ -216,7 +216,7 @@
                         </div>
                     </div>
 
-                    {{-- Классы пользователя --}}
+                    {{-- Классы пользователя (Mis Próximas Clases) --}}
                     <div class="space-y-4">
                         <h2 class="text-xl font-bold text-[#002d55] flex items-center">
                             <i class="bi bi-calendar-check mr-2 text-[#d40839]"></i> Mis Próximas Clases
@@ -253,7 +253,58 @@
                             </div>
                         @endif
                     </div>
-                    {{-- EXTRA SERVICIOS & COMBOS (SISTEMA DE PESTAÑAS PHP PURO) --}}
+
+                    {{-- EXTRA УСЛУГИ & КОМБО (PATRON COMPOSITE) --}}
+                    <div class="space-y-6">
+                        <div class="border-b border-slate-100 pb-4">
+                            <h2 class="text-xl font-bold text-[#002d55] flex items-center">
+                                <i class="bi bi-bag-plus mr-2 text-[#d40839]"></i> Servicios Extra y Combos Especiales
+                            </h2>
+                            <p class="text-xs text-slate-400 mt-1">Potencia tu entrenamiento con servicios individuales o paquetes armados a tu medida.</p>
+                        </div>
+                        
+                        <form action="{{ route('socio.contratar-extras') }}" method="POST" class="space-y-6">
+                            @csrf
+
+                            {{-- СЕГМЕНТ 1: Комплексные пакеты (Combos) --}}
+                            <div class="space-y-3">
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center">
+                                    <i class="bi bi-tags mr-1.5 text-amber-500"></i> 1. Combos Promocionales (Todo Incluido)
+                                </h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    @forelse($todosCombos ?? [] as $combo)
+                                        <label class="bg-gradient-to-br from-amber-50/40 to-white border border-amber-200 hover:border-amber-400 rounded-2xl p-5 flex items-start space-x-3 cursor-pointer shadow-sm transition-all has-[:checked]:border-amber-500 has-[:checked]:bg-amber-50/20">
+                                            <input type="checkbox" name="combos[]" value="{{ $combo->id }}" class="mt-1.5 accent-amber-600 rounded">
+                                            <div class="flex-1">
+                                                <div class="flex justify-between items-baseline">
+                                                    <span class="font-bold text-base text-[#002d55]">{{ $combo->nombre }}</span>
+                                                    <span class="text-amber-600 font-black text-base">${{ number_format($combo->precio, 0) }}</span>
+                                                </div>
+                                                <p class="text-xs text-slate-500 mt-1">{{ $combo->descripcion }}</p>
+                                                
+                                                @if($combo->servicios && $combo->servicios->isNotEmpty())
+                                                    <div class="mt-3 pt-2.5 border-t border-amber-100/70 space-y-1">
+                                                        <span class="text-[10px] font-bold uppercase tracking-wider text-amber-700/80 block">Servicios incluidos:</span>
+                                                        <div class="flex flex-wrap gap-1.5">
+                                                            @foreach($combo->servicios as $sInclud)
+                                                                <span class="bg-white border border-amber-200 text-[#002d55] text-[10px] font-medium px-2 py-0.5 rounded-lg shadow-2xs">
+                                                                    ✓ {{ $sInclud->nombre }}
+                                                                </span>
+                                                            @endforeach
+                                                        </div>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </label>
+                                    @empty
+                                        <div class="col-span-2 bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-4 text-center text-xs text-slate-400">
+                                            No hay combos compuestos disponibles en este momento.
+                                        </div>
+                                    @endforelse
+                                </div>
+                            </div>
+
+{{-- EXTRA SERVICIOS & COMBOS (SISTEMA DE PESTAÑAS PHP PURO) --}}
 @php
     // Determinamos la pestaña activa desde el parámetro URL (por defecto 'combos')
     $activeTab = request()->query('tab', 'combos');
@@ -366,143 +417,133 @@
     </form>
 </div>
 
-                    {{-- Муляж истории платежей --}}
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <h2 class="text-xl font-bold text-[#002d55] flex items-center">
-                                <i class="bi bi-credit-card mr-2 text-[#d40839]"></i> Historial de Pagos
-                            </h2>
+---
+
+{{-- HISTORIAL DE PAGOS --}}
+<div class="space-y-4 mt-8">
+    <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold text-[#002d55] flex items-center">
+            <i class="bi bi-credit-card mr-2 text-[#d40839]"></i> Historial de Pagos
+        </h2>
+    </div>
+    
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
+                    <th class="p-4">Fecha Emisión</th>
+                    <th class="p-4">Monto Final</th>
+                    <th class="p-4">Método</th>
+                    <th class="p-4">Estado</th>
+                    <th class="p-4 text-center">Acción</th>
+                </tr>
+            </thead>
+            <tbody class="text-sm font-medium text-slate-600">
+                @forelse($historialPagos as $pago)
+                    <tr class="border-b border-slate-100 last:border-0 hover:bg-slate-50/50">
+                        <td class="p-4 text-[#002d55] font-bold">{{ $pago->fecha }}</td>
+                        <td class="p-4">${{ number_format($pago->monto, 2) }}</td>
+                        <td class="p-4 text-slate-400">{{ $pago->metodo_pago }}</td>
+                        <td class="p-4">
+                            @if($pago->estado == 'PAGADO')
+                                <span class="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase">PAGADO</span>
+                            @elseif($pago->estado == 'PENDIENTE')
+                                <span class="bg-amber-50 text-amber-600 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase">PENDIENTE</span>
+                            @else
+                                <span class="bg-rose-50 text-rose-600 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase">{{ $pago->estado }}</span>
+                            @endif
+                        </td>
+                        <td class="p-4 text-center">
+                            @if($pago->estado == 'PENDIENTE')
+                                <form action="{{ route('socio.pagar', $pago->id) }}" method="POST" class="inline-block">
+                                    @csrf
+                                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl uppercase tracking-wider flex items-center transition-colors shadow-sm">
+                                        <i class="bi bi-wallet2 mr-1"></i> Pagar
+                                    </button>
+                                </form>
+                            @else
+                                <span class="text-emerald-600 flex items-center justify-center text-xs font-bold">
+                                    <i class="bi bi-check-circle-fill mr-1 text-emerald-500"></i> Confirmado
+                                </span>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5" class="p-8 text-center text-sm text-slate-400">
+                            No hay registros de pagos disponibles de momento.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
+
+---
+
+{{-- COLONNA DERECHA: CLASES DISPONIBLES --}}
+<div class="space-y-6 mt-8">
+    <h2 class="text-xl font-bold text-[#002d55] flex items-center">
+        <i class="bi bi-plus-circle mr-2 text-[#d40839]"></i> Clases Disponibles (Toda la Red)
+    </h2>
+    
+    @if($clasesDisponibles->isEmpty())
+        <div class="bg-[#002d55] rounded-3xl p-6 text-white/50 text-center text-sm">
+            No hay clases disponibles en este momento.
+        </div>
+    @else
+        <div class="space-y-4">
+            @foreach($clasesDisponibles as $clase)
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3 text-left">
+                    <div class="flex justify-between items-start gap-2">
+                        <div>
+                            <h3 class="font-bold text-[#002d55] text-lg leading-tight">{{ $clase->nombre }}</h3>
+                            <p class="text-xs text-slate-400 mt-1">{{ $clase->descripcion }}</p>
                         </div>
                         
-                        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-                            <table class="w-full text-left border-collapse">
-                                <thead>
-                                    <tr class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
-                                        <th class="p-4">Fecha Emisión</th>
-                                        <th class="p-4">Monto Final</th>
-                                        <th class="p-4">Método</th>
-                                        <th class="p-4">Estado</th>
-                                        <th class="p-4 text-center">Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="text-sm font-medium text-slate-600">
-                                    @forelse($historialPagos as $pago)
-                                        <tr class="border-b border-slate-100 last:border-0 hover:bg-slate-50/50">
-                                            {{-- В твоей миграции поле называется 'fecha' --}}
-                                            <td class="p-4 text-[#002d55] font-bold">{{ $pago->fecha }}</td>
-                                            
-                                            <td class="p-4">${{ number_format($pago->monto, 2) }}</td>
-                                            
-                                            {{-- Добавляем метод оплаты из твоей БД --}}
-                                            <td class="p-4 text-slate-400">{{ $pago->metodo_pago }}</td>
-                                            
-                                            <td class="p-4">
-                                                @if($pago->estado == 'PAGADO')
-                                                    <span class="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase">
-                                                        PAGADO
-                                                    </span>
-                                                @elseif($pago->estado == 'PENDIENTE')
-                                                    <span class="bg-amber-50 text-amber-600 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase">
-                                                        PENDIENTE
-                                                    </span>
-                                                @else
-                                                    <span class="bg-rose-50 text-rose-600 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase">
-                                                        {{ $pago->estado }}
-                                                    </span>
-                                                @endif
-                                            </td>
-                                            
-                                            <td class="p-4 text-center">
-                                                @if($pago->estado == 'PENDIENTE')
-                                                    {{-- Форма оплаты к нашему роуту --}}
-                                                    <form action="{{ route('socio.pagar', $pago->id) }}" method="POST" class="inline-block">
-                                                        @csrf
-                                                        <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl uppercase tracking-wider flex items-center transition-colors shadow-sm">
-                                                            <i class="bi bi-wallet2 mr-1"></i> Pagar
-                                                        </button>
-                                                    </form>
-                                                @else
-                                                    <span class="text-emerald-600 flex items-center justify-center text-xs font-bold">
-                                                        <i class="bi bi-check-circle-fill mr-1 text-emerald-500"></i> Confirmado
-                                                    </span>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="5" class="p-8 text-center text-sm text-slate-400">
-                                                No hay registros de pagos disponibles de momento.
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
+                        <span class="text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider whitespace-nowrap
+                            {{ $clase->sede_id == $socio->sede_id ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600' }}">
+                            {{ $clase->sede->nombre }}
+                            {{ $clase->sede_id != $socio->sede_id ? '(Invitado)' : '' }}
+                        </span>
                     </div>
-                </div>
-
-                {{-- ПРАВАЯ КОЛОНКА (Доступные классы всей сети) --}}
-                <div class="space-y-6">
-                    <h2 class="text-xl font-bold text-[#002d55] flex items-center">
-                        <i class="bi bi-plus-circle mr-2 text-[#d40839]"></i> Clases Disponibles (Toda la Red)
-                    </h2>
                     
-                    @if($clasesDisponibles->isEmpty())
-                        <div class="bg-[#002d55] rounded-3xl p-6 text-white/50 text-center text-sm">
-                            No hay clases disponibles en este momento.
-                        </div>
-                    @else
-                        <div class="space-y-4">
-                            @foreach($clasesDisponibles as $clase)
-                                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3 text-left">
-                                    <div class="flex justify-between items-start gap-2">
-                                        <div>
-                                            <h3 class="font-bold text-[#002d55] text-lg leading-tight">{{ $clase->nombre }}</h3>
-                                            <p class="text-xs text-slate-400 mt-1">{{ $clase->descripcion }}</p>
-                                        </div>
-                                        
-                                        <span class="text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider whitespace-nowrap
-                                            {{ $clase->sede_id == $socio->sede_id ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600' }}">
-                                            {{ $clase->sede->nombre }}
-                                            {{ $clase->sede_id != $socio->sede_id ? '(Invitado)' : '' }}
-                                        </span>
-                                    </div>
-                                    
-                                    <div class="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
-                                        <span class="flex items-center"><i class="bi bi-calendar3 mr-1 text-[#d40839]"></i> {{ $clase->fecha }}</span>
-                                        <span class="flex items-center"><i class="bi bi-clock mr-1 text-[#d40839]"></i> {{ \Carbon\Carbon::parse($clase->hora)->format('H:i') }} hs</span>
-                                        <span class="flex items-center"><i class="bi bi-people mr-1 text-[#d40839]"></i> {{ $clase->capacidad }} cupos</span>
-                                    </div>
+                    <div class="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
+                        <span class="flex items-center"><i class="bi bi-calendar3 mr-1 text-[#d40839]"></i> {{ $clase->fecha }}</span>
+                        <span class="flex items-center"><i class="bi bi-clock mr-1 text-[#d40839]"></i> {{ \Carbon\Carbon::parse($clase->hora)->format('H:i') }} hs</span>
+                        <span class="flex items-center"><i class="bi bi-people mr-1 text-[#d40839]"></i> {{ $clase->capacidad }} cupos</span>
+                    </div>
 
-                                    @if($misInscripciones->contains('id', $clase->id))
-                                        <button class="w-full bg-slate-100 text-slate-400 text-xs font-bold py-2.5 rounded-xl cursor-not-allowed uppercase tracking-wider mt-2 flex items-center justify-center space-x-1" disabled>
-                                            <i class="bi bi-check2-all text-emerald-600 text-sm"></i>
-                                            <span>Ya estás inscrito</span>
-                                        </button>
-                                    @elseif($clase->capacidad <= 0)
-                                        <button class="w-full bg-slate-100 text-slate-400 text-xs font-bold py-2.5 rounded-xl cursor-not-allowed uppercase tracking-wider mt-2" disabled>
-                                            Agotado (Sin cupos)
-                                        </button>
-                                    @else
-                                        {{-- Проверка на VIP-права или соответствие родному филиалу при записи --}}
-                                        @if($socio->categoria === 'VIP' || $clase->sede_id == $socio->sede_id)
-                                            <form action="/clases/{{ $clase->id }}/inscribir" method="POST">
-                                                @csrf
-                                                <button type="submit" class="w-full bg-[#d40839] hover:bg-[#b0062e] text-white text-xs font-bold py-2.5 rounded-xl transition duration-200 uppercase tracking-wider mt-2">
-                                                    Inscribirse
-                                                </button>
-                                            </form>
-                                        @else
-                                            <button class="w-full bg-slate-100 text-slate-400 text-[10px] font-bold py-2.5 rounded-xl cursor-not-allowed uppercase tracking-wider mt-2" title="Solo los socios VIP pueden entrenar en otras sedes" disabled>
-                                                Exclusivo Sede Propia o VIP
-                                            </button>
-                                        @endif
-                                    @endif
-                                </div>
-                            @endforeach
-                        </div>
+                    @if($misInscripciones->contains('id', $clase->id))
+                        <button class="w-full bg-slate-100 text-slate-400 text-xs font-bold py-2.5 rounded-xl cursor-not-allowed uppercase tracking-wider mt-2 flex items-center justify-center space-x-1" disabled>
+                            <i class="bi bi-check2-all text-emerald-600 text-sm"></i>
+                            <span>Ya estás inscrito</span>
+                        </button>
+                    @elseif($clase->capacidad <= 0)
+                        <button class="w-full bg-slate-100 text-slate-400 text-xs font-bold py-2.5 rounded-xl cursor-not-allowed uppercase tracking-wider mt-2" disabled>
+                            Agotado (Sin cupos)
+                        </button>
+                    @else
+                        @if($socio->categoria === 'VIP' || $clase->sede_id == $socio->sede_id)
+                            <form action="/clases/{{ $clase->id }}/inscribir" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full bg-[#d40839] hover:bg-[#b0062e] text-white text-xs font-bold py-2.5 rounded-xl transition duration-200 uppercase tracking-wider mt-2">
+                                    Inscribirse
+                                </button>
+                            </form>
+                        @else
+                            <button class="w-full bg-slate-100 text-slate-400 text-[10px] font-bold py-2.5 rounded-xl cursor-not-allowed uppercase tracking-wider mt-2" title="Solo los socios VIP pueden entrenar en otras sedes" disabled>
+                                Exclusivo Sede Propia o VIP
+                            </button>
+                        @endif
                     @endif
                 </div>
+            @endforeach
+        </div>
+    @endif
+</div>
+                                      
 
             </div>
         </div>

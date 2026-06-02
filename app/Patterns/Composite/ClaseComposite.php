@@ -19,7 +19,7 @@ class ClaseComposite implements ClaseComponent
 
     public function getNombre(): string
     {
-        return $this->nombreCombo . " (Пакет из " . count($this->componentes) . " услуг)";
+        return $this->nombreCombo . " (Paquete de " . count($this->componentes) . " servicios)";
     }
 
     public function getPrecio(): float

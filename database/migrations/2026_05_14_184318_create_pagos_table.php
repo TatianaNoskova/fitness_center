@@ -20,8 +20,7 @@ return new class extends Migration
                 
                 // Relaciones
                 $table->foreignId('socio_id')->constrained('users')->onDelete('cascade');
-                $table->foreignId('plan_id')->constrained('plans')->onDelete('cascade');
-                
+                $table->foreignId('plan_id')->nullable()->constrained()->onDelete('cascade');                
                 $table->timestamps();
             });
         }

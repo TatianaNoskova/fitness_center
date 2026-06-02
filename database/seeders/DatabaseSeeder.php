@@ -17,6 +17,8 @@ class DatabaseSeeder extends Seeder
             PlanSeeder::class,
             UserSeeder::class,
             ClaseSeeder::class,
+            ServicioComboSeeder::class,
+
         ]);
     }
 }

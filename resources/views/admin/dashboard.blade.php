@@ -80,5 +80,28 @@
         </div>
     </div>
 
+    {{-- КАРТОЧКА НОВОГО РАЗДЕЛА: КОМБО И ДОП. УСЛУГИ (COMPOSITE) --}}
+    <div class="border border-black/5 rounded-3xl p-6 flex flex-col justify-between bg-white hover:border-[#002d55]/30 hover:shadow-md transition duration-300 relative group">
+        <div>
+            <div class="flex justify-between items-start mb-4">
+                <div class="space-y-1">
+                    <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider block">Конструктор</span>
+                    <h3 class="text-lg font-bold text-slate-900">Servicios Extras (Combos)</h3>
+                </div>
+                <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500">
+                    <i class="bi bi-diagram-3 text-lg"></i>
+                </div>
+            </div>
+            <p class="text-xs text-slate-400 font-light leading-relaxed">
+                Управление одиночными услугами и создание комплексных комбо-пакетов (Pattern Composite).
+            </p>
+        </div>
+        <div class="mt-6">
+            <a href="{{ route('composite.index') }}" class="block w-full text-center bg-[#002d55] hover:bg-[#ff9a01] text-white py-2.5 text-xs font-bold tracking-wide uppercase transition duration-300 rounded-xl shadow-xs">
+                Configurar Servicios
+            </a>
+        </div>
+    </div>
+
 </div>
 @endsection

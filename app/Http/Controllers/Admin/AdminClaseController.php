@@ -4,8 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Patterns\Composite\ClaseComposite;
-use App\Patterns\Composite\ClaseLeaf;
+
 use App\Models\Clase;
 
 class AdminClaseController extends Controller
@@ -18,19 +17,10 @@ class AdminClaseController extends Controller
         // 1. Твой родной код: берём все классы с филиалами и сортировкой
         $clases = \App\Models\Clase::with('sede')->orderBy('fecha')->orderBy('hora')->get();
         
-        // 2. РЕАЛИЗАЦИЯ COMPOSITE: Создаем комбо-пакет «Интенсив: Тело к лету»
-        $comboCurso = new \App\Patterns\Composite\ClaseComposite("Пакет «Интенсив: Тело к лету»");
+        
 
-        // Берём первые 3 занятия из твоей коллекции, чтобы наполнить комбо реальными данными
-        $primerasClases = $clases->take(3);
 
-        foreach ($primerasClases as $claseModel) {
-            // Оборачиваем каждую модель Clase в Лист (Leaf) и добавляем в Композит
-            $comboCurso->agregar(new \App\Patterns\Composite\ClaseLeaf($claseModel));
-        }
-
-        // 3. Возвращаем твой view, добавив в compact переменную comboCurso
-        return view('admin.clases', compact('clases', 'comboCurso'));
+        return view('admin.clases', compact('clases'));
     }
 
     /**
