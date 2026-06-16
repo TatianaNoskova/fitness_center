@@ -33,9 +33,12 @@ class Clase extends Model
     }
 
     public function socios()
-{
-    return $this->belongsToMany(Socio::class, 'clase_socio', 'clase_id', 'socio_id', 'id', 'user_id');
-}
+    {
+        // Оставляем только имя таблицы и внешние ключи. Laravel сам поймет первичные ключи моделей!
+        return $this->belongsToMany(Socio::class, 'clase_socio', 'clase_id', 'socio_id')
+                    ->withPivot('asistencia') // Без этого тренер не сможет читать и менять статус!
+                    ->withTimestamps();
+    }
 
     /**
      * Методы из UML-диаграммы

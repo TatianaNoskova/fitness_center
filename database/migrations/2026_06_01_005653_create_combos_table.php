@@ -15,6 +15,8 @@ return new class extends Migration
         Schema::create('combos', function (Blueprint $table) {
             $table->id();
             $table->string('nombre');
+            // ИСПРАВЛЕНО: Добавили поле скидки в процентах (по умолчанию 0, т.е. без скидки)
+            $table->integer('descuento')->default(0); 
             $table->timestamps();
         });
 
@@ -32,6 +34,8 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // ИСПРАВЛЕНО: Дропаем обе таблицы в правильном порядке (сначала связующую из-за внешних ключей)
+        Schema::dropIfExists('combo_servicio');
         Schema::dropIfExists('combos');
     }
 };

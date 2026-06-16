@@ -37,7 +37,8 @@ class ServicioComboSeeder extends Seeder
 
         // 2. Creamos la estructura del Composite en la Base de Datos
         $combo = Combo::create([
-            'nombre' => 'Combo Premium «Recuperación Total»'
+            'nombre' => 'Combo Premium «Recuperación Total»',
+            'descuento' => 15
         ]);
 
         // Vinculamos los servicios al combo a través de la tabla intermedia (Pivot)

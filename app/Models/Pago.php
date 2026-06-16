@@ -9,7 +9,18 @@ class Pago extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['fecha', 'monto', 'metodo_pago', 'estado', 'socio_id', 'plan_id'];
+    // ИСПРАВЛЕНО: Добавили combo_id, servicio_id и detalles в разрешенные поля
+    protected $fillable = [
+        'fecha', 
+        'monto', 
+        'metodo_pago', 
+        'estado', 
+        'socio_id', 
+        'plan_id', 
+        'combo_id', 
+        'servicio_id', 
+        'detalles'
+    ];
 
     /**
      * Связи (Relationships)
@@ -24,40 +35,44 @@ class Pago extends Model
         return $this->belongsTo(Plan::class, 'plan_id');
     }
 
+    // НОВАЯ СВЯЗЬ: Получить комбо, к которому относится платеж
+    public function combo()
+    {
+        return $this->belongsTo(Combo::class, 'combo_id');
+    }
+
+    // НОВАЯ СВЯЗЬ: Получить одиночную услугу, к которой относится платеж
+    public function servicio()
+    {
+        return $this->belongsTo(Servicio::class, 'servicio_id');
+    }
+
     /**
      * Методы из UML-диаграммы
      */
-
-    // registrarPago()
     public static function registrarPago(array $data)
     {
-        $data['fecha'] = now()->toDateString(); // Ставим текущую дату
-        $data['estado'] = 'PENDIENTE'; // Изначально платеж ожидает проверки
+        $data['fecha'] = now()->toDateString();
+        $data['estado'] = 'PENDIENTE';
         
         $pago = self::create($data);
-        
-        // Сразу валидируем платеж после создания
         $pago->validarPago();
         
         return $pago;
     }
 
-    // actualizarPago()
     public function actualizarPago(array $data)
     {
         return $this->update($data);
     }
 
-    // obtenerPago()
     public function obtenerPago()
     {
         return $this;
     }
 
-    // validarPago(): Проверка и подтверждение платежа
     public function validarPago(): bool
     {
-        // Простая валидация данных: сумма должна быть больше 0 и указан метод оплаты
         if ($this->monto > 0 && !empty($this->metodo_pago)) {
             $this->update(['estado' => 'PAGADO']);
             return true;

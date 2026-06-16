@@ -1,21 +1,58 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
+use App\Http\Controllers\Controller;
 
+use App\Models\Plan;
 use Illuminate\Http\Request;
-use App\Models\Plan; // Твоя модель обычных тарифов клуба
 
 class PlanesController extends Controller
 {
-    /**
-     * Отображение стандартных тарифных планов клуба.
-     */
-    public function index()
+   public function index()
+{
+    // Теперь, когда сервер прочитает файл заново, он отдаст оба плана!
+    $planes = \App\Models\Plan::all(); 
+    
+    return view('admin.planes', compact('planes'));
+}
+    public function store(Request $request)
     {
-        // Берем из базы только стандартные абонементы
-        $planes = Plan::all();
 
-        // Возвращаем их на чистую страницу тарифов
-        return view('planes', compact('planes'));
+    
+        $validated = $request->validate([
+            'nombre' => 'required|string|max:50',
+            'descripcion' => 'nullable|string|max:100',
+            'precio' => 'required|numeric|min:0',
+            'duracion' => 'required|integer|min:1',
+            'estado' => 'required|in:ACTIVO,INACTIVO',
+        ]);
+
+        try {
+            Plan::create($validated);
+            return redirect()->route('plans.index')->with('success', '¡Plan creado con éxito!');
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->withErrors(['error' => 'Error: ' . $e->getMessage()]);
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        $plan = Plan::find($id);
+        if (!$plan) return redirect()->route('plans.index')->withErrors(['error' => 'Plan no encontrado']);
+
+        $validated = $request->validate([
+            'nombre' => 'required|string|max:50',
+            'descripcion' => 'nullable|string|max:100',
+            'precio' => 'required|numeric|min:0',
+            'duracion' => 'required|integer|min:1',
+            'estado' => 'required|in:ACTIVO,INACTIVO',
+        ]);
+
+        try {
+            $plan->update($validated);
+            return redirect()->route('plans.index')->with('success', '¡Plan actualizado con éxito!');
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->withErrors(['error' => 'Error: ' . $e->getMessage()]);
+        }
     }
 }

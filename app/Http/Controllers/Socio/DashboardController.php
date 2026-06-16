@@ -201,18 +201,20 @@ class DashboardController extends Controller
                     'metodo_pago' => 'Efectivo/Tarjeta',
                     'estado'      => 'PENDIENTE',
                     'socio_id'    => $socio->user_id,
-                    'plan_id'     => null, // Это экстра-услуга, а не основной тариф, ставим null
-                    'detalles'    => "Servicio Extra: {$servicio->nombre}", // Опционально, если есть такое поле в БД
+                    'plan_id'     => null, 
+                    'combo_id'    => null,        // Для услуги комбо = null
+                    'servicio_id' => $servicio->id, // <--- СВЯЗАЛИ С ОДИНОЧНОЙ УСЛУГОЙ!
+                     
                 ]);
             }
         }
 
-        // 4. Создаем отдельные платежи для каждого КОМБО (суммируя его внутренности)
+        // 4. Создаем отдельные платежи для каждого КОМБО
         if (!empty($comboIds)) {
             $combos = Combo::with('servicios')->whereIn('id', $comboIds)->get();
             
             foreach ($combos as $combo) {
-                $precioCombo = $combo->servicios->sum('precio');
+                $precioCombo = $combo->precio_calculado; // Твой паттерн Composite
 
                 Pago::create([
                     'fecha'       => now()->toDateString(),
@@ -220,8 +222,10 @@ class DashboardController extends Controller
                     'metodo_pago' => 'Efectivo/Tarjeta',
                     'estado'      => 'PENDIENTE',
                     'socio_id'    => $socio->user_id,
-                    'plan_id'     => null, // Ставим null, чтобы не путать с основной абонентской платой
-                    'detalles'    => "Combo Extra: {$combo->nombre}", // Полезно для вывода в истории
+                    'plan_id'     => null, 
+                    'combo_id'    => $combo->id,    // <--- СВЯЗАЛИ С КОМБО-ПАКЕТОМ!
+                    'servicio_id' => null,          // Для комбо одиночная услуга = null
+                
                 ]);
             }
         }

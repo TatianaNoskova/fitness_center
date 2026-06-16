@@ -77,10 +77,9 @@ class Socio extends Model
      */
     public function clases()
     {
-        // 'socio_id' — колонка в сводной таблице clase_socio
-        // 'clase_id' — колонка в сводной таблице clase_socio
-        // 'user_id'  — локальный ключ в таблице socios, по которому связываемся
-        return $this->belongsToMany(Clase::class, 'clase_socio', 'socio_id', 'clase_id', 'user_id', 'id');
+        return $this->belongsToMany(Clase::class, 'clase_socio', 'socio_id', 'clase_id')
+                    ->withPivot('asistencia')
+                    ->withTimestamps();
     }
 
     /**

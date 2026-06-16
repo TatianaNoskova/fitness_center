@@ -44,11 +44,18 @@
                 <h5 class="text-xs font-bold text-emerald-950 uppercase tracking-wider mb-3">
                     <i class="bi bi-folder-plus text-emerald-600 mr-1"></i> 2. Crear Nuevo Combo Vacío (Composite)
                 </h5>
+                {{-- ИСПРАВЛЕНО: Изменили сетку формы, чтобы красиво уместить инпут скидки --}}
                 <form action="{{ route('composite.combo.store') }}" method="POST" class="flex flex-col sm:flex-row gap-2 items-end">
                     @csrf
                     <div class="flex-1 space-y-1 w-full">
                         <label class="text-[9px] font-bold text-slate-500 uppercase tracking-wide block">Nombre del Combo</label>
                         <input type="text" name="nombre" placeholder="Ej. Combo Boxeo & Cardio, VIP Festivo..." required
+                               class="w-full bg-white border border-slate-200 text-xs px-3 py-1.5 rounded-lg text-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                    </div>
+                    {{-- ДОБАВЛЕНО ПОЛЕ ДЛЯ СКИДКИ --}}
+                    <div class="w-full sm:w-20 space-y-1">
+                        <label class="text-[9px] font-bold text-slate-500 uppercase tracking-wide block">Desc. (%)</label>
+                        <input type="number" name="descuento" placeholder="0" min="0" max="100" value="0" required
                                class="w-full bg-white border border-slate-200 text-xs px-3 py-1.5 rounded-lg text-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500">
                     </div>
                     <button type="submit" class="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800 text-white text-xs px-4 py-1.5 rounded-lg font-bold transition shadow-2xs whitespace-nowrap h-[30px]">
@@ -72,14 +79,14 @@
                         <select name="combo_id" onchange="document.getElementById('combo-selector-form').submit()" class="bg-white border border-emerald-200 text-emerald-800 text-xs px-3 py-1.5 rounded-xl font-medium shadow-2xs focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer">
                             @foreach($todosLosCombos as $c)
                                 <option value="{{ $c->id }}" {{ $comboModel->id == $c->id ? 'selected' : '' }}>
-                                    {{ $c->nombre }}
+                                    {{ $c->nombre }} @if($c->descuento > 0) (-{{ $c->descuento }}%) @endif
                                 </option>
                             @endforeach
                         </select>
                     </form>
                 </div>
                 
-                {{-- Динамическое имя текущего выбранного Композита с подсчетом услуг --}}
+                {{-- Динамическое имя текущего выбранного Композита с подсчетом услуг и скидкой от паттерна --}}
                 <p class="text-xl font-extrabold text-slate-900 pt-2">
                     <i class="bi bi-gift-fill text-emerald-500 mr-1.5"></i> {{ $comboServicios->getNombre() }}
                 </p>
@@ -94,12 +101,28 @@
                     @if($comboModel->servicios->isEmpty())
                         <span class="text-xs text-slate-400 italic">El combo está vacío. ¡Agrega servicios abajo!</span>
                     @endif
+
+                    {{-- ВИЗУАЛЬНЫЙ БЕЙДЖ ДЛЯ СКИДКИ (если она больше 0) --}}
+                    @if($comboModel->descuento > 0 && !$comboModel->servicios->isEmpty())
+                        <span class="bg-amber-100 border border-amber-200 text-amber-800 text-xs px-3 py-1 rounded-lg font-bold shadow-2xs animate-pulse">
+                            <i class="bi bi-tags-fill text-amber-600 mr-1"></i> Descuento del {{ $comboModel->descuento }}% aplicado
+                        </span>
+                    @endif
                 </div>
             </div>
 
             {{-- Динамический расчет цены Композита --}}
             <div class="bg-white px-6 py-4 rounded-xl border border-emerald-100 text-center shadow-xs min-w-[180px] self-stretch lg:self-center flex flex-col justify-center">
                 <span class="text-[10px] uppercase tracking-widest text-slate-400 font-bold block">Precio Calculated</span>
+                
+                {{-- СТАРЯ ЦЕНА БЕЗ СКИДКИ (перечеркнутая, если скидка есть) --}}
+                @if($comboModel->descuento > 0 && !$comboModel->servicios->isEmpty())
+                    <span class="text-xs text-rose-500 line-through font-semibold block -mb-1">
+                        ${{ number_format($comboModel->servicios->sum('precio'), 2) }}
+                    </span>
+                @endif
+
+                {{-- Итоговая цена, посчитанная через $comboServicios->getPrecio() --}}
                 <span class="text-3xl font-black text-emerald-600">
                     ${{ number_format($comboServicios->getPrecio(), 2) }}
                 </span>

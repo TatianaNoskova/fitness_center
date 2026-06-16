@@ -1,147 +1,169 @@
-@extends('layouts.app')
+@extends('layouts.app') {{-- Убедитесь, что имя лейаута совпадает с вашей системой --}}
 
 @section('content')
-<div class="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-    
-    <div class="bg-white p-8 rounded-3xl border border-slate-300/30 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-            <span class="text-xs font-bold uppercase tracking-widest text-[#ff9a01]">Panel del Entrenador</span>
-            <h1 class="text-3xl font-bold tracking-tight text-[#002d55] mt-1">¡Buen día, Coach {{ Auth::user()->nombre }}!</h1>
-            <p class="text-sm text-slate-500 mt-1">Gestiona tus clases asignadas y lleva el control de asistencia de tus alumnos.</p>
-        </div>
-        <div class="bg-[#002d55] text-white px-4 py-2 rounded-xl text-xs font-semibold">
-            Estado: <span class="text-emerald-400 font-bold uppercase">Activo</span>
-        </div>
-    </div>
-
-    <div class="space-y-4">
-        <h2 class="text-xl font-bold text-[#002d55] flex items-center gap-2">
-            <i class="bi bi-calendar3 text-[#ff9a01]"></i> Mis Clases Asignadas
-        </h2>
-
-        {{-- Предполагается, что из контроллера мы передадим переменную $clases --}}
-        @if(isset($clases) && $clases->count() > 0)
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @foreach($clases as $clase)
-                    <div class="bg-white rounded-3xl border border-slate-300/30 shadow-sm overflow-hidden flex flex-col justify-between">
-                        <div class="p-6 space-y-4">
-                            <div class="flex justify-between items-start">
-                                <span class="px-3 py-1 bg-[#ff9a01]/10 text-[#ff9a01] rounded-lg text-xs font-bold uppercase">
-                                    {{ $clase->nombre }}
-                                </span>
-                                <span class="text-xs text-slate-400 font-medium">
-                                    <i class="bi bi-geo-alt"></i> {{ $clase->sede->nombre ?? 'Sede Principal' }}
-                                </span>
-                            </div>
-
-                            <p class="text-sm text-slate-600 line-clamp-2">{{ $clase->descripcion }}</p>
-
-                            <div class="pt-2 grid grid-cols-2 gap-2 text-xs text-slate-500">
-                                <div><i class="bi bi-calendar-event text-[#002d55]"></i> {{ \Carbon\Carbon::parse($clase->fecha)->format('d/m/Y') }}</div>
-                                <div><i class="bi bi-clock text-[#002d55]"></i> {{ $clase->hora }} hs</div>
-                            </div>
-                        </div>
-
-                        <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-between items-center">
-                            <span class="text-xs font-medium text-slate-500">
-                                <i class="bi bi-people"></i> {{ $clase->socios->count() }} / {{ $clase->capacidadMaxima }} scriptos
-                            </span>
-                            
-                            {{-- Кнопка вызывает JavaScript, который откроет модалку для конкретного класса --}}
-                            <button type="button" 
-                                    onclick="openAsistenciaModal({{ $clase->id }}, '{{ $clase->nombre }}')" 
-                                    class="text-xs font-bold text-[#ff9a01] hover:text-[#e08800] transition flex items-center gap-1">
-                                <i class="bi bi-check2-square"></i> Tomar Asistencia
-                            </button>
-                        </div>
-                    </div>
-                @endforeach
+<div class="py-6 bg-slate-50 min-h-screen font-sans">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {{-- Encabezado del Dashboard --}}
+        <div class="md:flex md:items-center md:justify-between mb-6">
+            <div class="flex-1 min-w-0">
+                <h2 class="text-2xl font-bold leading-7 text-slate-900 sm:text-3xl sm:truncate">
+                    Panel del Entrenador
+                </h2>
+                <p class="text-sm text-slate-500 mt-1">
+                    Gestiona tus clases asignadas y el control de asistencia de los socios.
+                </p>
             </div>
-        @else
-            <div class="bg-white p-12 rounded-3xl border border-dashed border-slate-300 text-center space-y-3">
-                <div class="text-4xl text-slate-300"><i class="bi bi-emoji-neutral"></i></div>
-                <h3 class="text-base font-bold text-[#002d55]">No tienes clases asignadas</h3>
-                <p class="text-xs text-slate-400 max-w-sm mx-auto">Cuando el administrador te asocie a un horario, tus clases aparecerán organizadas en esta sección.</p>
+        </div>
+
+        {{-- Bloque de Alertas (Mensajes de éxito o error) --}}
+        @if(session('success'))
+            <div class="mb-4 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center gap-2 shadow-sm">
+                <span class="font-bold">✓</span> {{ session('success') }}
             </div>
         @endif
-    </div>
-</div>
 
-<div id="asistenciaModal" class="hidden fixed inset-0 bg-[#002d55]/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-3xl max-w-lg w-full shadow-xl overflow-hidden border border-slate-200 flex flex-col max-h-[85vh]">
-        
-        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-            <div>
-                <h3 class="text-lg font-bold text-[#002d55]" id="modalClaseTitle">Control de Asistencia</h3>
-                <p class="text-xs text-slate-400 mt-0.5">Marca a los alumnos presentes hoy</p>
+        @if(session('error'))
+            <div class="mb-4 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-center gap-2 shadow-sm">
+                <span class="font-bold">✕</span> {{ session('error') }}
             </div>
-            <button onclick="closeAsistenciaModal()" class="text-slate-400 hover:text-slate-600 text-xl">&times;</button>
+        @endif
+
+        {{-- Listado de Clases --}}
+        <div class="space-y-4">
+            @forelse($clases as $clase)
+                @php
+                    // Validamos si la clase ya inició o pasó (Punto 1)
+                    $fechaClase = \Carbon\Carbon::parse($clase->fecha . ' ' . $clase->hora);
+                    $yaIniciada = \Carbon\Carbon::now()->greaterThanOrEqualTo($fechaClase);
+                @endphp
+
+                {{-- ИСПРАВЛЕНО: Убран атрибут open, теперь все классы закрыты по умолчанию --}}
+                <details class="group bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    
+                    {{-- Cabecera de la Clase (Siempre visible) --}}
+                    <summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-slate-50 transition list-none select-none border-b border-slate-100">
+                        <div class="flex items-center gap-4">
+                            {{-- Flecha indicadora con animación de rotación al abrir --}}
+                            <span class="transition-transform duration-200 group-open:rotate-180 text-slate-400 text-xs">
+                                ▼
+                            </span>
+                            <div>
+                                <h3 class="text-base font-semibold text-slate-900">{{ $clase->nombre }}</h3>
+                                <p class="text-xs text-slate-500 mt-0.5 flex flex-wrap gap-x-3 gap-y-1-5">
+                                    <span class="inline-flex items-center gap-1">
+                                        📅 {{ \Carbon\Carbon::parse($clase->fecha)->format('d/m/Y') }}
+                                    </span>
+                                    <span class="inline-flex items-center gap-1">
+                                        🕒 {{ \Carbon\Carbon::parse($clase->hora)->format('H:i') }}
+                                    </span>
+                                    <span class="inline-flex items-center gap-1">
+                                        📍 {{ $clase->sede->nombre ?? 'Sin sede asignada' }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        {{-- Contador de Socios Inscritos --}}
+                        <div>
+                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                                Inscritos: {{ $clase->socios->count() }}
+                            </span>
+                        </div>
+                    </summary>
+
+                    {{-- Contenido Desplegable: Tabla de Alumnos --}}
+                    <div class="p-4 bg-slate-50/50">
+                        @if($clase->socios->isEmpty())
+                            <div class="text-center py-6 text-sm text-slate-500 italic">
+                                No hay alumnos inscritos en esta clase todavía.
+                            </div>
+                        @else
+                            <div class="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm">
+                                <table class="min-w-full divide-y divide-slate-200 text-sm text-left">
+                                    <thead class="bg-slate-50 text-slate-600 text-xs uppercase font-bold tracking-wider">
+                                        <tr>
+                                            <th class="py-3 px-4">Alumno</th>
+                                            <th class="py-3 px-4 text-center">Estado Actual</th>
+                                            <th class="py-3 px-4 text-right">Tomar Asistencia</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-200 text-slate-700">
+                                        @foreach($clase->socios as $socio)
+                                            @php
+                                                $status = $socio->pivot->asistencia ?? 'PENDIENTE';
+                                            @endphp
+                                            <tr class="hover:bg-slate-50/50 transition">
+                                                
+                                                {{-- Nombre y Apellido del Socio --}}
+                                                <td class="py-3 px-4 font-medium text-slate-900 whitespace-nowrap">
+                                                    {{ $socio->user->nombre }} {{ $socio->user->apellido }}
+                                                </td>
+                                                
+                                                {{-- Badge del estado de asistencia --}}
+                                                <td class="py-3 px-4 text-center whitespace-nowrap">
+                                                    @if($status === 'SI')
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                                                            ● Asistió
+                                                        </span>
+                                                    @elseif($status === 'NO')
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800">
+                                                            ● Faltó
+                                                        </span>
+                                                    @else
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+                                                            ● Pendiente
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                                
+                                                {{-- Botones de acción dinámicos --}}
+                                                <td class="py-3 px-4 text-right whitespace-nowrap">
+                                                    @if(!$yaIniciada)
+                                                        <span class="text-xs text-slate-400 italic">No disponible hasta el inicio</span>
+                                                    @else
+                                                        <form action="{{ url('/entrenador/clases/'.$clase->id.'/socio/'.$socio->user_id.'/asistencia') }}" method="POST" class="inline-flex gap-2 m-0">
+                                                            @csrf
+                                                            
+                                                            {{-- Botón Presente --}}
+                                                            <button type="submit" name="asistio" value="SI" 
+                                                                {{ $status === 'SI' ? 'disabled' : '' }}
+                                                                class="px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm border
+                                                                {{ $status === 'SI' 
+                                                                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed border-slate-200' 
+                                                                    : 'bg-emerald-500 hover:bg-emerald-600 text-white border-transparent' }}"
+                                                                title="Marcar Presente">
+                                                                ✓ Presente
+                                                            </button>
+
+                                                            {{-- Botón Ausente --}}
+                                                            <button type="submit" name="asistio" value="NO" 
+                                                                {{ $status === 'NO' ? 'disabled' : '' }}
+                                                                class="px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm border
+                                                                {{ $status === 'NO' 
+                                                                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed border-slate-200' 
+                                                                    : 'bg-rose-500 hover:bg-rose-600 text-white border-transparent' }}"
+                                                                title="Marcar Ausente">
+                                                                ✗ Ausente
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    </div>
+                </details>
+            @empty
+                <div class="text-center py-12 bg-white rounded-xl border-2 border-dashed border-slate-300 text-slate-500 shadow-sm">
+                    <p class="text-base font-medium text-slate-600">No tienes clases programadas asignadas.</p>
+                </div>
+            @endforelse
         </div>
 
-        {{-- Экшн формы будет динамически меняться через JS --}}
-        <form id="asistenciaForm" method="POST" action="" class="flex flex-col justify-between overflow-hidden flex-1">
-            @csrf
-            
-            <div class="p-6 overflow-y-auto space-y-3 flex-1" id="sociosListContainer">
-                </div>
-
-            <div class="p-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
-                <button type="button" onclick="closeAsistenciaModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-xl transition">
-                    Cancelar
-                </button>
-                <button type="submit" class="px-4 py-2 bg-[#ff9a01] hover:bg-[#e08800] text-white text-xs font-bold rounded-xl shadow-md transition">
-                    Guardar Asistencia
-                </button>
-            </div>
-        </form>
     </div>
 </div>
-
-<script>
-    function openAsistenciaModal(claseId, claseNombre) {
-        // 1. Меняем заголовок модалки
-        document.getElementById('modalClaseTitle').innerText = 'Asistencia: ' + claseNombre;
-        
-        // 2. Устанавливаем динамический URL для отправки формы (меняй под свой роут обработки)
-        document.getElementById('asistenciaForm').action = '/clases/' + claseId + '/asistencia';
-
-        // 3. Эмуляция динамической загрузки списка учеников, записанных на этот класс (Inscripciones)
-        // В реальном проекте тут лучше сделать быстрый fetch() запрос к вашему API, 
-        // но для начала мы можем передавать данные или сгенерировать их для теста:
-        const container = document.getElementById('sociosListContainer');
-        container.innerHTML = ''; // Чистим старый список
-
-        // Примерочный список студентов для теста верстки (в продакшене соберешь из связи $clase->socios)
-        const mockSocios = [
-            { id: 1, nombre: "Benicio", apellido: "Bravo", dni: "33333333" },
-            { id: 2, nombre: "Juan", apellido: "Pérez", dni: "44444444" }
-        ];
-
-        if(mockSocios.length > 0) {
-            mockSocios.forEach(socio => {
-                const item = document.createElement('div');
-                item.className = "flex items-center justify-between p-3 rounded-2xl border border-slate-100 bg-white hover:bg-slate-50 transition";
-                item.innerHTML = `
-                    <div class="flex flex-col">
-                        <span class="text-sm font-bold text-[#002d55]">${socio.nombre} ${socio.apellido}</span>
-                        <span class="text-[11px] text-slate-400">DNI: ${socio.dni}</span>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" name="asistencia[]" value="${socio.id}" class="w-4 h-4 text-[#ff9a01] border-slate-300 rounded focus:ring-[#ff9a01]">
-                    </label>
-                `;
-                container.appendChild(item);
-            });
-        } else {
-            container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">No hay alumnos inscritos en esta clase aún.</p>';
-        }
-
-        // Показываем модалку
-        document.getElementById('asistenciaModal').classList.remove('hidden');
-    }
-
-    function closeAsistenciaModal() {
-        document.getElementById('asistenciaModal').classList.add('hidden');
-    }
-</script>
 @endsection
