@@ -1,25 +1,22 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="mb-8 flex justify-between items-center">
-    <div>
-        <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Gestionar Clases (Занятия)</h1>
-        <p class="text-slate-500 mt-1">Panel de gestión de horarios de entrenamientos y asignación de entrenadores.</p>
-    </div>
-</div>
-
+{{-- Notificaciones --}}
 @if(session('success'))
-    <div class="mb-6 bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-2xl shadow-sm">
+    <div id="msg-success-alert" class="mb-6 bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-xl shadow-sm flex justify-between items-start">
         <div class="flex">
             <i class="bi bi-check-circle-fill text-emerald-500 text-lg mr-2"></i>
             <p class="text-emerald-800 font-medium">{{ session('success') }}</p>
         </div>
+        <button type="button" onclick="document.getElementById('msg-success-alert').remove()" class="text-emerald-400 hover:text-emerald-600 transition ml-4 focus:outline-none p-0.5 rounded-lg hover:bg-emerald-100/50">
+            <i class="bi bi-x-lg text-sm flex items-center justify-center w-4 h-4"></i>
+        </button>
     </div>
 @endif
 
 @if ($errors->any())
-    <div class="mb-6 bg-rose-50 border-l-4 border-rose-500 p-4 rounded-r-2xl shadow-sm">
-        <div class="flex flex-col">
+    <div id="msg-errors-alert" class="mb-6 bg-rose-50 border-l-4 border-rose-500 p-4 rounded-r-xl shadow-sm flex justify-between items-start">
+        <div class="flex flex-col flex-grow">
             <div class="flex items-center mb-1">
                 <i class="bi bi-exclamation-triangle-fill text-rose-500 text-lg mr-2"></i>
                 <p class="text-rose-800 font-bold">Por favor, corrige los siguientes errores:</p>
@@ -30,6 +27,9 @@
                 @endforeach
             </ul>
         </div>
+        <button type="button" onclick="document.getElementById('msg-errors-alert').remove()" class="text-rose-400 hover:text-rose-600 transition ml-4 focus:outline-none p-0.5 rounded-lg hover:bg-rose-100/50">
+            <i class="bi bi-x-lg text-sm flex items-center justify-center w-4 h-4"></i>
+        </button>
     </div>
 @endif
 
@@ -168,7 +168,7 @@
 </div>
 
 {{-- ======================================================================= --}}
-{{-- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ (ВЫНЕСЕНО ИЗ ТАБЛИЦЫ ДЛЯ ПРАВИЛЬНОЙ ВЕРСТКИ) --}}
+{{-- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ И ВАЛИДАЦИИ ЗАНЯТИЯ --}}
 {{-- ======================================================================= --}}
 @if(request('edit_id'))
     @php 
@@ -181,50 +181,71 @@
             $tieneInscritos = $inscritosCount > 0;
         @endphp
 
-        <div class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-lg w-full overflow-hidden flex flex-col">
+        <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+            <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-lg w-full overflow-hidden flex flex-col antialiased my-auto">
                 
-                <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-                    <h3 class="text-lg font-bold text-slate-800">
+                {{-- Шапка --}}
+                <div class="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-slate-900">
                         @if($tieneInscritos)
                             <i class="bi bi-shield-lock-fill text-blue-500 mr-2"></i> Ajustar Clase (Con Alumnos)
                         @else
                             <i class="bi bi-pencil-square text-amber-500 mr-2"></i> Editar y Reasignar Clase
                         @endif
                     </h3>
-                    <a href="{{ route('admin.clases.index', ['selected_sede_id' => request('selected_sede_id')]) }}" class="text-slate-400 hover:text-slate-600 text-xl font-bold">
+                    <a href="{{ route('admin.clases.index', ['selected_sede_id' => request('selected_sede_id')]) }}" class="text-slate-400 hover:text-slate-600 transition">
                         <i class="bi bi-x-lg"></i>
                     </a>
                 </div>
 
-                <form action="{{ route('admin.clases.update', $claseParaEditar->id) }}" method="POST" class="p-6 space-y-4 text-left">
+                <form action="{{ route('admin.clases.update', $claseParaEditar->id) }}" method="POST" class="p-4 space-y-3 text-left">
                     @csrf
                     @method('PUT')
 
                     <input type="hidden" name="selected_sede_id" value="{{ request('selected_sede_id', $claseParaEditar->sede_id) }}">
                     <input type="hidden" name="sede_id" value="{{ $claseParaEditar->sede_id }}">
 
+                    {{-- Предупреждение о записанных учениках --}}
                     @if($tieneInscritos)
-                        <div class="bg-blue-50 border border-blue-100 text-blue-800 rounded-xl p-3.5 text-xs flex items-start gap-2.5">
+                        <div class="bg-blue-50 border border-blue-100 text-blue-800 rounded-xl px-3 py-2 text-xs flex items-start gap-2">
                             <i class="bi bi-info-circle-fill text-blue-500 mt-0.5 text-sm flex-shrink-0"></i> 
                             <div>
-                                <span class="font-bold">Clase bajo control de cambios:</span> Hay <span class="font-bold text-blue-600">{{ $inscritosCount }} alumno(s)</span> inscrito(s). Solo se permite modificar la descripción y ampliar la capacidad de la sala.
+                                <span class="font-bold">Control de cambios activo:</span> Hay <span class="font-bold text-blue-600">{{ $inscritosCount }} alumno(s)</span> inscrito(s). Datos básicos, fecha y hora bloqueados para proteger sus agendas.
                             </div>
                         </div>
                     @endif
 
+                    {{-- Название класса --}}
                     <div>
-                        <label class="block text-xs font-bold uppercase text-slate-400 mb-1.5">Nombre de la Clase</label>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Nombre de la Clase</label>
                         <input type="text" name="nombre" value="{{ old('nombre', $claseParaEditar->nombre) }}" required
                             {{ $tieneInscritos ? 'disabled' : '' }}
-                            class="w-full rounded-xl border-slate-200 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500 {{ $tieneInscritos ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : '' }}">
+                            class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500/20 shadow-sm {{ $tieneInscritos ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : '' }}">
                     </div>
 
+                    {{-- Дата и Время (Добавленный блок) --}}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Fecha</label>
+                            <input type="date" name="fecha" value="{{ old('fecha', $claseParaEditar->fecha ? \Carbon\Carbon::parse($claseParaEditar->fecha)->format('Y-m-d') : '') }}" required
+                                {{ $tieneInscritos ? 'disabled' : '' }}
+                                min="{{ date('Y-m-d') }}" {{-- Запрет прошлых дат на фронтенде --}}
+                                class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500/20 shadow-sm {{ $tieneInscritos ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : '' }}">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Hora de Inicio</label>
+                            <input type="time" name="hora" value="{{ old('hora', $claseParaEditar->hora ? \Carbon\Carbon::parse($claseParaEditar->hora)->format('H:i') : '') }}" required
+                                {{ $tieneInscritos ? 'disabled' : '' }}
+                                class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500/20 shadow-sm {{ $tieneInscritos ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : '' }}">
+                        </div>
+                    </div>
+
+                    {{-- Выбор Тренера --}}
                     <div>
-                        <label class="block text-xs font-bold uppercase text-slate-400 mb-1.5">Seleccionar Entrenador</label>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Seleccionar Entrenador</label>
                         <select name="entrenador_id" required 
                             {{ $tieneInscritos ? 'disabled' : '' }}
-                            class="w-full rounded-xl border-slate-200 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm {{ $tieneInscritos ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : '' }}">
+                            class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500/20 shadow-sm {{ $tieneInscritos ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : '' }}">
                             
                             @foreach($sedes as $s)
                                 @php
@@ -242,9 +263,7 @@
                                                 <option value="{{ $entrenador->user_id }}" 
                                                     {{ old('entrenador_id', $claseParaEditar->entrenador_id) == $entrenador->user_id ? 'selected' : '' }}>
                                                     {{ $entrenador->user->nombre }} {{ $entrenador->user->apellido }} 
-                                                    @if($entrenador->especialidad)
-                                                        — [{{ $entrenador->especialidad }}]
-                                                    @endif
+                                                    @if($entrenador->especialidad) — [{{ $entrenador->especialidad }}] @endif
                                                 </option>
                                             @endif
                                         @endforeach
@@ -253,37 +272,40 @@
                             @endforeach
                         </select>
                         @if(!$tieneInscritos)
-                            <p class="text-[11px] text-slate-400 mt-1">
-                                <i class="bi bi-info-circle mr-1"></i> Al elegir un entrenador de otra sede, la clase se moverá automáticamente.
+                            <p class="text-[10px] text-slate-400 mt-0.5">
+                                <i class="bi bi-info-circle mr-0.5"></i> Al reasignar a un entrenador de otra sede, la clase cambiará de ubicación de manera automática.
                             </p>
                         @endif
                     </div>
 
+                    {{-- Вместимость --}}
                     <div>
-                        <label class="block text-xs font-bold uppercase text-slate-400 mb-1.5">Capacidad Máxima</label>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Capacidad Máxima</label>
                         <input type="number" name="capacidad" value="{{ old('capacidad', $claseParaEditar->capacidad) }}" 
                             min="{{ max(1, $inscritosCount) }}" required
-                            class="w-full rounded-xl border-slate-200 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm">
+                            class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500/20 shadow-sm">
                         @if($tieneInscritos)
-                            <p class="text-[11px] text-amber-600 mt-1">
-                                <i class="bi bi-exclamation-triangle mr-1"></i> No puede ser menor a los {{ $inscritosCount }} alumnos ya inscritos.
+                            <p class="text-[10px] text-amber-600 mt-0.5 font-medium">
+                                <i class="bi bi-exclamation-triangle mr-0.5"></i> No puede ser menor a los {{ $inscritosCount }} cupos ocupados.
                             </p>
                         @endif
                     </div>
 
+                    {{-- Описание --}}
                     <div>
-                        <label class="block text-xs font-bold uppercase text-slate-400 mb-1.5">Descripción</label>
-                        <textarea name="descripcion" rows="2" 
-                            class="w-full rounded-xl border-slate-200 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm">{{ old('descripcion', $claseParaEditar->descripcion) }}</textarea>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Descripción</label>
+                        <textarea name="descripcion" rows="2" placeholder="Detalles o requisitos..."
+                            class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500/20 shadow-sm">{{ old('descripcion', $claseParaEditar->descripcion) }}</textarea>
                     </div>
 
-                    <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                    {{-- Подвал с кнопками --}}
+                    <div class="flex justify-end gap-3 pt-3 border-t border-slate-100 mt-4">
                         <a href="{{ route('admin.clases.index', ['selected_sede_id' => request('selected_sede_id')]) }}" 
-                        class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm px-4 py-2 rounded-xl transition-colors">
+                           class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm rounded-xl transition">
                             Cancelar
                         </a>
                         <button type="submit" 
-                            class="text-white font-bold text-sm px-4 py-2 rounded-xl transition-colors shadow-sm {{ $tieneInscritos ? 'bg-blue-600 hover:bg-blue-700' : 'bg-amber-500 hover:bg-amber-600' }}">
+                            class="px-5 py-2 text-white font-semibold text-sm rounded-xl transition shadow-sm {{ $tieneInscritos ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-100' : 'bg-amber-500 hover:bg-amber-600 shadow-amber-100' }}">
                             {{ $tieneInscritos ? 'Aplicar Ajustes' : 'Guardar Cambios' }}
                         </button>
                     </div>
@@ -295,29 +317,31 @@
 
 
 {{-- ======================================================================= --}}
-{{-- МОДАЛЬНОЕ ОКНО: СОЗДАНИЕ НОВОЙ КЛАССЫ --}}
+{{-- МОДАЛЬНОЕ ОКНО: СОЗДАНИЕ НОВОГО ЗАНЯТИЯ (КОМПАКТНАЯ ВЕРСИЯ) --}}
 {{-- ======================================================================= --}}
 @if(request('open_create'))
-    <div class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-2xl w-full overflow-hidden flex flex-col">
+    <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-2xl w-full overflow-hidden flex flex-col antialiased my-auto">
             
-            <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-                <h3 class="text-lg font-bold text-slate-800 flex items-center">
+            {{-- Шапка модального окна --}}
+            <div class="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <h3 class="text-sm font-bold text-slate-900 flex items-center">
                     <i class="bi bi-calendar-plus-fill text-blue-600 mr-2"></i> Programar Nueva Clase
                 </h3>
-                <a href="{{ route('admin.clases.index') }}" class="text-slate-400 hover:text-slate-600 text-xl font-bold">
+                <a href="{{ route('admin.clases.index') }}" class="text-slate-400 hover:text-slate-600 transition">
                     <i class="bi bi-x-lg"></i>
                 </a>
             </div>
 
-            <div class="p-6">
+            <div class="p-4">
                 @if(!$selectedSedeId)
-                    <form action="{{ route('admin.clases.index') }}" method="GET" class="space-y-4">
+                    {{-- ШАГ 1: ВЫБОР ФИЛИАЛА --}}
+                    <form action="{{ route('admin.clases.index') }}" method="GET" class="space-y-3">
                         <input type="hidden" name="open_create" value="1">
                         
                         <div>
-                            <label class="block text-xs font-bold uppercase text-slate-400 mb-2">Paso 1: Selecciona la Sede / Filial</label>
-                            <select name="selected_sede_id" required class="w-full rounded-xl border-slate-200 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm">
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Paso 1: Selecciona la Sede / Filial</label>
+                            <select name="selected_sede_id" required class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500/20 shadow-sm">
                                 <option value="">Selecciona una sede para ver entrenadores disponibles...</option>
                                 @foreach($sedes as $sede)
                                     <option value="{{ $sede->id }}">{{ $sede->nombre }} ({{ $sede->direccion }})</option>
@@ -325,42 +349,45 @@
                             </select>
                         </div>
 
-                        <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
-                            <a href="{{ route('admin.clases.index') }}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm px-4 py-2 rounded-xl transition-colors">
+                        <div class="flex justify-end gap-3 pt-3 border-t border-slate-100 mt-4">
+                            <a href="{{ route('admin.clases.index') }}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm rounded-xl transition">
                                 Cancelar
                             </a>
-                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-6 py-2 rounded-xl transition-colors shadow-sm inline-flex items-center">
-                                Siguiente <i class="bi bi-arrow-right ml-2"></i>
+                            <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl transition shadow-sm inline-flex items-center">
+                                Siguiente <i class="bi bi-arrow-right ml-1.5"></i>
                             </button>
                         </div>
                     </form>
                 @else
-                    <form action="{{ route('admin.clases.store') }}" method="POST" class="space-y-5">
+                    {{-- ШАГ 2: ЗАПОЛНЕНИЕ ДАННЫХ ЗАНЯТИЯ --}}
+                    <form action="{{ route('admin.clases.store') }}" method="POST" class="space-y-3">
                         @csrf
                         
                         <input type="hidden" name="sede_id" value="{{ $selectedSedeId }}">
                         <input type="hidden" name="selected_sede_id" value="{{ $selectedSedeId }}">
 
-                        <div class="bg-blue-50 border border-blue-100 text-blue-800 rounded-xl px-4 py-3 text-sm flex justify-between items-center">
-                            <div class="flex items-center font-bold">
-                                <i class="bi bi-geo-alt-fill mr-2 text-blue-500 text-base"></i> 
-                                Sede Elegida: <span class="ml-1 text-blue-600">{{ $sedes->find($selectedSedeId)->nombre }}</span>
+                        {{-- Информационная плашка выбранного филиала --}}
+                        <div class="bg-blue-50 border border-blue-100 text-blue-800 rounded-xl px-3 py-2 text-xs flex justify-between items-center">
+                            <div class="flex items-center font-semibold">
+                                <i class="bi bi-geo-alt-fill mr-1.5 text-blue-500"></i> 
+                                Sede Elegida: <span class="ml-1 font-bold text-blue-700">{{ $sedes->find($selectedSedeId)->nombre }}</span>
                             </div>
-                            <a href="{{ route('admin.clases.index', ['open_create' => 1]) }}" class="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                            <a href="{{ route('admin.clases.index', ['open_create' => 1]) }}" class="text-[11px] bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold px-2 py-1 rounded-lg transition-colors flex items-center gap-1">
                                 <i class="bi bi-arrow-left"></i> Cambiar Sede
                             </a>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {{-- Сетка полей формы --}}
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-xs font-bold uppercase text-slate-400 mb-1.5">Nombre de la Clase / Deporte</label>
+                                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Nombre de la Clase / Deporte</label>
                                 <input type="text" name="nombre" value="{{ old('nombre') }}" placeholder="Ej. Crossfit, Yoga" required
-                                    class="w-full rounded-xl border-slate-200 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm">
+                                    class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500/20 shadow-sm">
                             </div>
 
                             <div>
-                                <label class="block text-xs font-bold uppercase text-slate-400 mb-1.5">Entrenador Available</label>
-                                <select name="entrenador_id" required class="w-full rounded-xl border-slate-200 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm">
+                                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Entrenador Disponible</label>
+                                <select name="entrenador_id" required class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500/20 shadow-sm">
                                     @if($entrenadores->isEmpty())
                                         <option value="">No hay entrenadores en esta sede</option>
                                     @else
@@ -380,36 +407,38 @@
                             </div>
 
                             <div>
-                                <label class="block text-xs font-bold uppercase text-slate-400 mb-1.5">Fecha</label>
+                                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Fecha</label>
                                 <input type="date" name="fecha" value="{{ old('fecha') }}" required
-                                    class="w-full rounded-xl border-slate-200 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm">
+                                    min="{{ date('Y-m-d') }}"
+                                    class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500/20 shadow-sm">
                             </div>
 
                             <div>
-                                <label class="block text-xs font-bold uppercase text-slate-400 mb-1.5">Hora de Inicio</label>
+                                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Hora de Inicio</label>
                                 <input type="time" name="hora" value="{{ old('hora') }}" required
-                                    class="w-full rounded-xl border-slate-200 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm">
+                                    class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500/20 shadow-sm">
                             </div>
 
-                            <div class="md:col-span-2">
-                                <label class="block text-xs font-bold uppercase text-slate-400 mb-1.5">Capacidad Máxima</label>
+                            <div class="sm:col-span-2">
+                                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Capacidad Máxima</label>
                                 <input type="number" name="capacidad" value="{{ old('capacidad', 15) }}" min="1" required
-                                    class="w-full rounded-xl border-slate-200 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm">
+                                    class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500/20 shadow-sm">
                             </div>
 
-                            <div class="md:col-span-2">
-                                <label class="block text-xs font-bold uppercase text-slate-400 mb-1.5">Descripción (Opcional)</label>
+                            <div class="sm:col-span-2">
+                                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Descripción (Opcional)</label>
                                 <textarea name="descripcion" rows="2" placeholder="Detalles de la clase..."
-                                        class="w-full rounded-xl border-slate-200 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm">{{ old('descripcion') }}</textarea>
+                                    class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500/20 shadow-sm">{{ old('descripcion') }}</textarea>
                             </div>
                         </div>
 
-                        <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
-                            <a href="{{ route('admin.clases.index') }}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm px-4 py-2 rounded-xl transition-colors">
+                        {{-- Кнопки действий --}}
+                        <div class="flex justify-end gap-3 pt-3 border-t border-slate-100 mt-4">
+                            <a href="{{ route('admin.clases.index') }}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm rounded-xl transition">
                                 Cancelar
                             </a>
                             <button type="submit" {{ $entrenadores->isEmpty() ? 'disabled' : '' }} 
-                                    class="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-sm px-6 py-2 rounded-xl transition-colors shadow-sm inline-flex items-center gap-2">
+                                    class="px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-semibold text-sm rounded-xl transition shadow-sm inline-flex items-center gap-1.5">
                                 <i class="bi bi-calendar-plus"></i> Crear Clase Asignada
                             </button>
                         </div>

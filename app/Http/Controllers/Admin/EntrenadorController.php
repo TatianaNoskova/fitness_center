@@ -14,7 +14,6 @@ class EntrenadorController extends Controller
 {
     public function index()
     {
-        // Подгружаем тренеров со связями
         $entrenadores = Entrenador::with(['user', 'obedienceSede'])->get();
         $sedes = Sede::all();
 
@@ -36,7 +35,7 @@ class EntrenadorController extends Controller
 
         DB::beginTransaction();
         try {
-            // Создаем пользователя с ролью entrenador
+
             $user = User::create([
                 'nombre' => $validated['nombre'],
                 'apellido' => $validated['apellido'],
@@ -47,7 +46,6 @@ class EntrenadorController extends Controller
                 'rol' => 'entrenador',
             ]);
 
-            // Создаем запись в таблице entrenadors
             Entrenador::create([
                 'user_id' => $user->id,
                 'sede_id' => $validated['sede_id'],
@@ -111,5 +109,26 @@ class EntrenadorController extends Controller
         
         $entrenador->update(['estado' => 'INACTIVO']);
         return redirect()->route('admin.entrenadores.index')->with('success', 'Entrenador desactivado.');
+    }
+
+    public function forceDelete($id)
+    {
+        $entrenador = Entrenador::where('user_id', $id)->first();
+
+        if (!$entrenador) {
+            return redirect()->route('admin.entrenadores.index')
+                ->withErrors(['error' => 'Entrenador no encontrado']);
+        }
+
+        $nombreCompleto = $entrenador->user->nombre . ' ' . $entrenador->user->apellido;
+        $user = $entrenador->user;
+
+        $entrenador->delete();
+        if ($user) {
+            $user->delete();
+        }
+
+        return redirect()->route('admin.entrenadores.index')
+            ->with('success', "El entrenador «{$nombreCompleto}» y todos sus datos han sido eliminados de forma permanente.");
     }
 }

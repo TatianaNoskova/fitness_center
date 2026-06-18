@@ -10,8 +10,7 @@ class SedeController extends Controller
 {
     public function index()
     {
-        // Подгружаем филиалы, считая количество связанных socios (клиентов)
-        // Метод withCount('socios') автоматически добавит поле socios_count в каждый объект
+        
         $sedes = Sede::withCount('socios')->get();
 
         return view('admin.sedes', compact('sedes'));
@@ -52,5 +51,20 @@ class SedeController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->withInput()->withErrors(['error' => 'Error: ' . $e->getMessage()]);
         }
+    }
+    public function destroy($id)
+    {
+        $sede = Sede::findOrFail($id);
+
+        if ($sede->socios_count > 0 || ($sede->users && $sede->users()->exists())) {
+            return redirect()->back()->withErrors([
+                'error' => "No se puede eliminar la sede «{$sede->nombre}» porque tiene socios activos vinculados."
+            ]);
+        }
+
+        $sede->delete();
+
+        return redirect()->route('admin.sedes.index')
+            ->with('success', "La sede «{$sede->nombre}» fue eliminada correctamente.");
     }
 }

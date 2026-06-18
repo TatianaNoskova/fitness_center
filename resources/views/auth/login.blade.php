@@ -48,7 +48,7 @@
             <div class="flex items-center">
                 <input id="remember_me" type="checkbox" name="remember" 
                     class="h-4 w-4 rounded border-slate-300 text-[#002d55] focus:ring-[#002d55]">
-                <label for="remember_me" class="ml-2 text-xs text-slate-400">Recordarme en этот компьютер</label>
+                <label for="remember_me" class="ml-2 text-xs text-slate-400">Recordarme en este dispositivo</label>
             </div>
 
             <div>

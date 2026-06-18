@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // Показать форму логина
     public function showLogin()
     {
         return view('auth.login');
@@ -20,7 +19,6 @@ class AuthController extends Controller
         return view('auth.register'); 
     }
 
-    // Обработка логина
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -31,10 +29,8 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             
-            // Получаем роль вошедшего пользователя
             $role = strtolower(Auth::user()->rol);
 
-            // Умная переадресация в зависимости от роли
             switch ($role) {
                 case 'administrador':
                     return redirect()->intended('/dashboard');
@@ -52,27 +48,22 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    // Обработка легкой регистрации
     public function register(Request $request)
     {
-        // 1. Валидируем входящие данные
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
         ]);
 
-        // 2. Разделяем строку по первому пробелу
         $parts = explode(' ', trim($data['name']), 2);
         $nombre = $parts[0];
         $apellido = $parts[1] ?? null;
 
-        // 3. Жесткая проверка: если фамилию не ввели, возвращаем ошибку назад в форму
         if (!$apellido) {
             return back()->withErrors(['name' => 'Por favor, ingresa tu nombre y apellido (ej. Benicio Bravo)'])->withInput();
         }
 
-        // 4. Создаем пользователя (по умолчанию это всегда socio)
         $user = User::create([
             'nombre' => $nombre,
             'apellido' => $apellido,
@@ -83,11 +74,9 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        // Так как при регистрации создается всегда клиент (socio), сразу шлем его на клиентский дашборд
         return redirect('/socio/dashboard');
     }
 
-    // Выход из системы
     public function logout(Request $request)
     {
         Auth::logout();

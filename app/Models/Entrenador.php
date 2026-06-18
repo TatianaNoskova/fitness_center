@@ -18,13 +18,11 @@ class Entrenador extends Model
 
     protected $fillable = ['user_id', 'sede_id', 'especialidad', 'estado'];
 
-    // Связь с базовым пользователем (у каждого тренера есть профиль юзера)
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    // Связь с филиалом
     public function obedienceSede()
     {
         return $this->belongsTo(Sede::class, 'sede_id');

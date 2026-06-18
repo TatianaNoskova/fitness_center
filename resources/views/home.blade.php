@@ -32,55 +32,82 @@
                 </div>
             @endguest
         </div>
-        
+
         <div class="md:col-span-6">
-    <div id="hero-slider" class="bg-white aspect-[4/3] w-full flex items-center justify-center border border-black/5 rounded-3xl relative group overflow-hidden shadow-sm">
-        
-        <img src="{{ asset('images/hero-focus.png') }}" 
-             alt="WorldClass Lifestyle 1" 
-             class="slide-img absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out group-hover:scale-105 opacity-100 z-10">
-        
-        <img src="{{ asset('images/hero-focus-2.png') }}" 
-             alt="WorldClass Lifestyle 2" 
-             class="slide-img absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out group-hover:scale-105 opacity-0 z-0">
-        
-        <img src="{{ asset('images/hero-focus-3.png') }}" 
-             alt="WorldClass Lifestyle 3" 
-             class="slide-img absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out group-hover:scale-105 opacity-0 z-0">
+            <div id="hero-slider" class="bg-white aspect-[4/3] w-full flex items-center justify-center border border-black/5 rounded-3xl relative group overflow-hidden shadow-sm">
+                
+                <img src="{{ asset('images/hero-focus.png') }}" 
+                     alt="WorldClass Lifestyle 1" 
+                     class="slide-img absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out group-hover:scale-105 opacity-100 z-10">
+                
+                <img src="{{ asset('images/hero-focus-2.png') }}" 
+                     alt="WorldClass Lifestyle 2" 
+                     class="slide-img absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out group-hover:scale-105 opacity-0 z-0">
+                
+                <img src="{{ asset('images/hero-focus-3.png') }}" 
+                     alt="WorldClass Lifestyle 3" 
+                     class="slide-img absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out group-hover:scale-105 opacity-0 z-0">
 
-        <div class="absolute inset-0 bg-gradient-to-t from-[#002d55]/10 to-transparent pointer-events-none z-20"></div>
-    </div>
-</div>
+                <div class="absolute inset-0 bg-gradient-to-t from-[#002d55]/10 to-transparent pointer-events-none z-20"></div>
+            </div>
+        </div>
 
-<script>
-    // Запускаем сразу, без ожидания DOMContentLoaded, так как скрипт идет строго ПОСЛЕ элементов
-    (function() {
-        const slider = document.getElementById('hero-slider');
-        if (!slider) return;
+        <script>
+            (function() {
+                const slider = document.getElementById('hero-slider');
+                if (!slider) return;
 
-        const slides = slider.querySelectorAll('.slide-img');
-        if (slides.length === 0) return;
+                const slides = slider.querySelectorAll('.slide-img');
+                if (slides.length === 0) return;
 
-        let currentSlide = 0;
-        const intervalTime = 4000;
+                let currentSlide = 0;
+                const intervalTime = 4000;
 
-        function changeSlide() {
-            // Старый слайд: убираем видимость и понижаем слой
-            slides[currentSlide].classList.remove('opacity-100', 'z-10');
-            slides[currentSlide].classList.add('opacity-0', 'z-0');
-            
-            // Считаем индекс следующего
-            currentSlide = (currentSlide + 1) % slides.length;
-            
-            // Новый слайд: добавляем видимость и поднимаем слой
-            slides[currentSlide].classList.remove('opacity-0', 'z-0');
-            slides[currentSlide].classList.add('opacity-100', 'z-10');
-        }
+                function changeSlide() {
+                    slides[currentSlide].classList.remove('opacity-100', 'z-10');
+                    slides[currentSlide].classList.add('opacity-0', 'z-0');
+                    
+                    currentSlide = (currentSlide + 1) % slides.length;
+                    
+                    slides[currentSlide].classList.remove('opacity-0', 'z-0');
+                    slides[currentSlide].classList.add('opacity-100', 'z-10');
+                }
 
-        setInterval(changeSlide, intervalTime);
-    })();
-</script>
+                setInterval(changeSlide, intervalTime);
+            })();
+        </script>
     </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 !mt-12">
+        <div class="{{ $recommendation['bg'] }} rounded-3xl p-6 flex items-start space-x-4 transition duration-300 shadow-sm md:col-span-2">
+            <div class="p-3 bg-white rounded-2xl shadow-sm flex-shrink-0 flex items-center justify-center">
+                <i class="bi {{ $recommendation['icon'] }} text-2xl"></i>
+            </div>
+            <div>
+                <h3 class="text-base font-bold text-[#002d55] tracking-tight">{{ $recommendation['title'] }}</h3>
+                <p class="text-sm text-slate-500 mt-1 font-light leading-relaxed">{{ $recommendation['text'] }}</p>
+            </div>
+        </div>
+
+        <div class="bg-white border border-black/5 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Estado del Clima</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Buenos Aires</p>
+                </div>
+                <i class="bi bi-cloud-sun text-slate-400 text-lg"></i>
+            </div>
+            
+            <div class="mt-4 flex items-baseline">
+                @if($weatherData)
+                    <span class="text-3xl font-bold tracking-tight text-[#002d55]">{{ round($weatherData['temperature_2m']) }}°C</span>
+                    <span class="text-xs font-medium text-slate-400 ml-2">en vivo</span>
+                @else
+                    <span class="text-sm text-slate-400 font-light">Clima no disponible</span>
+                @endif
+            </div>
+        </div>
+    </div>
 
     <section>
         <div class="mb-12">
@@ -149,11 +176,11 @@
                         </div>
                         <div class="mt-8 space-y-6">
                             <div class="flex items-baseline">
-                                <span class="text-4xl font-bold tracking-tight text-[#ff9a01]">${{ number_format($plan->precio_base ?? 0, 0) }}</span>
+                                <span class="text-4xl font-bold tracking-tight text-[#ff9a01]">${{ number_format($plan->precio ?? 0, 0) }}</span>
                                 <span class="text-slate-400 text-xs font-normal ml-2">/ mes</span>
                             </div>
                             <a href="{{ route('register') }}" class="block w-full text-center border-2 border-[#002d55] text-[#002d55] py-3 text-[11px] font-bold tracking-widest uppercase hover:bg-[#002d55] hover:text-white transition duration-300 rounded-xl">
-                                Seleccionar Plan
+                                Empezar Ahora
                             </a>
                         </div>
                     </div>

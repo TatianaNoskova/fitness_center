@@ -10,14 +10,12 @@ class PlanesController extends Controller
 {
    public function index()
 {
-    // Теперь, когда сервер прочитает файл заново, он отдаст оба плана!
     $planes = \App\Models\Plan::all(); 
     
     return view('admin.planes', compact('planes'));
 }
     public function store(Request $request)
     {
-
     
         $validated = $request->validate([
             'nombre' => 'required|string|max:50',

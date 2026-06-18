@@ -60,12 +60,13 @@ Route::middleware('auth')->group(function () {
         Route::post('/entrenadores', [\App\Http\Controllers\Admin\EntrenadorController::class, 'store'])->name('admin.entrenadores.store');
         Route::put('/entrenadores/{id}', [\App\Http\Controllers\Admin\EntrenadorController::class, 'update'])->name('admin.entrenadores.update');
         Route::delete('/entrenadores/{id}', [\App\Http\Controllers\Admin\EntrenadorController::class, 'destroy'])->name('admin.entrenadores.destroy');
-    
+        Route::delete('/entrenadores/{id}/force', [\App\Http\Controllers\Admin\EntrenadorController::class, 'forceDelete'])->name('admin.entrenadores.forceDelete');
         // --- УПРАВЛЕНИЕ ФИЛИАЛАМИ (SEDES) ---
         Route::get('/sedes-view', [\App\Http\Controllers\Admin\SedeController::class, 'index'])->name('admin.sedes.index');
         Route::post('/sedes', [\App\Http\Controllers\Admin\SedeController::class, 'store'])->name('admin.sedes.store');
         Route::put('/sedes/{id}', [\App\Http\Controllers\Admin\SedeController::class, 'update'])->name('admin.sedes.update');
-        
+        Route::delete('/sedes/{id}', [\App\Http\Controllers\Admin\SedeController::class, 'destroy'])->name('admin.sedes.destroy');
+        Route::delete('/socios/{id}/force', [\App\Http\Controllers\Admin\SocioController::class, 'forceDelete'])->name('admin.socios.forceDelete');         
         // --- УПРАВЛЕНИЕ ТАРИФАМИ (PLANES) ---
         Route::get('/plans-view', [\App\Http\Controllers\Admin\PlanesController::class, 'index'])->name('planes.index');
         Route::post('/planes', [\App\Http\Controllers\Admin\PlanesController::class, 'store'])->name('planes.store');

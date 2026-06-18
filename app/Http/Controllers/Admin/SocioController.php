@@ -15,13 +15,11 @@ class SocioController extends Controller
 {
     public function index()
     {
-        // Подгружаем socios вместе с пользователем, филиалом и планом
         $socios = Socio::with(['user', 'sede', 'plan'])->get();
         
         $sedes = Sede::all();
         $planes = Plan::all();
 
-        // Категории берем массивом строк, так как под них нет отдельной таблицы
         $categorias = ['NORMAL', 'ESTUDIANTE', 'VIP'];
 
         return view('admin.socios', compact('socios', 'sedes', 'planes', 'categorias'));
@@ -35,7 +33,7 @@ class SocioController extends Controller
         'dni' => 'required|string|unique:users,dni',
         'telefono' => 'nullable|string',
         'email' => 'required|email|unique:users,email',
-        'password' => 'required|string|min:6', // Пароль теперь ОБЯЗАТЕЛЕН при создании админом
+        'password' => 'required|string|min:6', 
         'sede_id' => 'required|exists:sedes,id',
         'plan_id' => 'required|exists:plans,id',
         'categoria' => 'required|in:NORMAL,ESTUDIANTE,VIP',
@@ -49,7 +47,7 @@ class SocioController extends Controller
             'dni' => $validated['dni'],
             'telefono' => $validated['telefono'],
             'email' => $validated['email'],
-            'password' => Hash::make($validated['password']), // Хешируем введенный админом пароль
+            'password' => Hash::make($validated['password']), 
             'rol' => 'socio',
         ]);
 
@@ -83,7 +81,7 @@ public function update(Request $request, $id)
         'plan_id' => 'required|exists:plans,id',
         'categoria' => 'required|in:NORMAL,ESTUDIANTE,VIP',
         'estado' => 'required|in:ACTIVO,INACTIVO',
-        'password' => 'nullable|string|min:6', // При редактировании — по желанию
+        'password' => 'nullable|string|min:6', 
     ]);
 
     DB::beginTransaction();
@@ -97,7 +95,6 @@ public function update(Request $request, $id)
         
         $userData = $request->only(['nombre', 'apellido', 'telefono', 'email']);
 
-        // Меняем пароль только если поле заполнено
         if ($request->filled('password')) {
             $userData['password'] = Hash::make($request->password);
         }
@@ -121,4 +118,24 @@ public function update(Request $request, $id)
         $socio->update(['estado' => 'INACTIVO']);
         return redirect()->route('admin.socios.index')->with('success', 'Socio desactivado.');
     }
+
+    public function forceDelete($id)
+{
+    $socio = Socio::where('user_id', $id)->first();
+
+    if (!$socio) {
+        return redirect()->route('admin.socios.index')
+            ->withErrors(['error' => 'Socio no encontrado']);
+    }
+
+    $nombreCompleto = $socio->user->nombre . ' ' . $socio->user->apellido;
+
+    $user = $socio->user;
+
+    $socio->delete();
+    $user->delete();
+
+    return redirect()->route('admin.socios.index')
+        ->with('success', "El socio «{$nombreCompleto}» y todos sus datos han sido eliminados de forma permanente.");
+}
 }

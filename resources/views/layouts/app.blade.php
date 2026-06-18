@@ -31,31 +31,14 @@
                 <div class="hidden md:flex space-x-1">
                     
                     @if(auth()->user()->rol === 'administrador')
-                        <a href="{{ url('/dashboard') }}" class="px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider text-slate-500 hover:bg-slate-100 hover:text-[#002d55] transition"><i class="bi bi-speedometer2 mr-1"></i> Dashboard</a>
-                        <a href="{{ url('/sedes-view') }}" class="px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider text-slate-500 hover:bg-slate-100 hover:text-[#002d55] transition"><i class="bi bi-building mr-1"></i> Sedes</a>
-                        <a href="{{ url('/socios-view') }}" class="px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider text-slate-500 hover:bg-slate-100 hover:text-[#002d55] transition"><i class="bi bi-people mr-1"></i> Socios</a>
-                        <a href="{{ url('/plans-view') }}" class="px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider text-slate-500 hover:bg-slate-100 hover:text-[#002d55] transition"><i class="bi bi-card-checklist mr-1"></i> Planes</a>
-                        <a href="{{ url('/clases-view') }}" class="px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider text-slate-500 hover:bg-slate-100 hover:text-[#002d55] transition"><i class="bi bi-calendar3 mr-1"></i> Clases</a>
+                        @foreach($adminNavbarItems as $item)
+                            <a href="{{ route($item['route']) }}" 
+                            class="px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition {{ request()->routeIs($item['route']) ? 'bg-slate-100 text-[#002d55]' : 'text-slate-500 hover:bg-slate-100 hover:text-[#002d55]' }}">
+                                <i class="bi {{ $item['icon'] }} mr-1"></i> {{ $item['label'] }}
+                            </a>
+                        @endforeach
                     @endif
 
-                    @if(auth()->user()->rol === 'entrenador')
-                        <a href="{{ url('/entrenador/dashboard') }}" class="px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider text-slate-500 hover:bg-slate-100 hover:text-[#002d55] transition"><i class="bi bi-calendar3 mr-1"></i> Mi Horarrio</a>
-                    @endif
-
-                    @if(auth()->user()->rol === 'socio')
-                    
-                        <a href="{{ url('/socio/dashboard') }}" class="px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider text-slate-500 hover:bg-slate-100 hover:text-[#002d55] transition">
-                            <i class="bi bi-speedometer2 mr-1"></i> Mi Panel
-                        </a>
-                        
-                        <a href="{{ url('/socio/dashboard') }}" class="px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider text-slate-500 hover:bg-slate-100 hover:text-[#002d55] transition">
-                            <i class="bi bi-calendar-plus mr-1"></i> Inscribirse a Clases
-                        </a>
-                        
-                        <a href="{{ url('/socio/dashboard') }}" class="px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider text-slate-500 hover:bg-slate-100 hover:text-[#002d55] transition">
-                            <i class="bi bi-credit-card mr-1"></i> Mis Pagos
-                        </a>
-                    @endif
                     
 
                 </div>
@@ -88,6 +71,23 @@
             <p class="font-bold text-slate-400 tracking-widest text-[10px]">STAY FOCUSED</p>
         </div>
     </footer>
+
+    <script>
+    // Una vez por hora (3600000 ms) checkeamos y renovamos CSRF-tocken
+    setInterval(function() {
+        fetch('/refresh-csrf')
+            .then(response => response.json())
+            .then(data => {
+                
+                let meta = document.querySelector('meta[name="csrf-token"]');
+                if (meta) meta.setAttribute('content', data.token);
+                
+                document.querySelectorAll('input[name="_token"]').forEach(input => {
+                    input.value = data.token;
+                });
+            }).catch(err => console.log('Error al refrescar el token'));
+    }, 3600000); 
+</script>
 
 </body>
 </html>

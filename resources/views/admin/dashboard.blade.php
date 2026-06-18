@@ -98,24 +98,20 @@
         </div>
     </div>
 
-    {{-- КАРТОЧКА НОВОГО РАЗДЕЛА: КОМБО И ДОП. УСЛУГИ (COMPOSITE) --}}
-    <div class="border border-black/5 rounded-3xl p-6 flex flex-col justify-between bg-white hover:border-[#002d55]/30 hover:shadow-md transition duration-300 relative group">
-        <div>
-            <div class="flex justify-between items-start mb-4">
-                <div class="space-y-1">
-                    <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider block">Constructor</span>
-                    <h3 class="text-lg font-bold text-slate-900">Servicios Extras (Combos)</h3>
-                </div>
-                <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500">
-                    <i class="bi bi-diagram-3 text-lg"></i>
-                </div>
+        {{-- КАРТОЧКА НОВОГО РАЗДЕЛА: КОМБО И ДОП. УСЛУГИ (COMPOSITE) --}}
+    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+        <div class="flex items-start justify-between">
+            <div>
+                <span class="text-xs font-semibold uppercase tracking-wider text-emerald-600">Constructor</span>
+                <h3 class="text-xl font-bold text-slate-800 mt-1">Servicios Extras (Combos)</h3>
+                <p class="text-sm text-slate-500 mt-2">Gestión de servicios extras и создание пакетов комбинированных услуг.</p>
             </div>
-            <p class="text-xs text-slate-400 font-light leading-relaxed">
-                Gestión de servicios extras y creación de paquetes combinados complejos.
-            </p>
+            <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+                <i class="bi bi-diagram-3 text-xl"></i>
+            </div>
         </div>
         <div class="mt-6">
-            <a href="{{ route('composite.index') }}" class="block w-full text-center bg-[#002d55] hover:bg-[#ff9a01] text-white py-2.5 text-xs font-bold tracking-wide uppercase transition duration-300 rounded-xl shadow-xs">
+            <a href="{{ route('composite.index') }}" class="w-full inline-flex justify-center items-center px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded-xl transition shadow-sm">
                 Configurar Servicios
             </a>
         </div>

@@ -76,14 +76,14 @@
                     <div class="p-4 bg-slate-50/50">
                         @if($clase->socios->isEmpty())
                             <div class="text-center py-6 text-sm text-slate-500 italic">
-                                No hay alumnos inscritos en esta clase todavía.
+                                No hay socios inscritos en esta clase todavía.
                             </div>
                         @else
                             <div class="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm">
                                 <table class="min-w-full divide-y divide-slate-200 text-sm text-left">
                                     <thead class="bg-slate-50 text-slate-600 text-xs uppercase font-bold tracking-wider">
                                         <tr>
-                                            <th class="py-3 px-4">Alumno</th>
+                                            <th class="py-3 px-4">Socio</th>
                                             <th class="py-3 px-4 text-center">Estado Actual</th>
                                             <th class="py-3 px-4 text-right">Tomar Asistencia</th>
                                         </tr>
