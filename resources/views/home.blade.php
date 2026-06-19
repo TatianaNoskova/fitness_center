@@ -78,7 +78,7 @@
         </script>
     </header>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 !mt-12">
+    <div id="clima" class="grid grid-cols-1 md:grid-cols-3 gap-6 !mt-12">
         <div class="{{ $recommendation['bg'] }} rounded-3xl p-6 flex items-start space-x-4 transition duration-300 shadow-sm md:col-span-2">
             <div class="p-3 bg-white rounded-2xl shadow-sm flex-shrink-0 flex items-center justify-center">
                 <i class="bi {{ $recommendation['icon'] }} text-2xl"></i>
@@ -109,7 +109,7 @@
         </div>
     </div>
 
-    <section>
+    <section id="sedes" >
         <div class="mb-12">
             <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Espacios</p>
             <h2 class="text-2xl font-bold tracking-tight text-[#002d55] mt-1">Nuestras Sedes</h2>
@@ -153,7 +153,7 @@
         @endif
     </section>
 
-    <section class="pb-12">
+    <section  id="tarifas" class="pb-12">
         <div class="mb-12">
             <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Membresías</p>
             <h2 class="text-2xl font-bold tracking-tight text-[#002d55] mt-1">Planes Disponibles</h2>

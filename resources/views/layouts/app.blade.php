@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fitness Club - Спортивный Стальной</title>
+    <title>Fitness Club - Estilo & Diciplina</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+        html {scroll-behavior: smooth;}
+        [id] {scroll-margin-top: 96px !important;}
         @keyframes heartbeat-three-times {
             0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 8, 57, 0.4); }
             50% { transform: scale(1.12); box-shadow: 0 0 0 10px rgba(212, 8, 57, 0); }
@@ -26,6 +28,20 @@
                     </span>
                     <span class="font-bold text-[#002d55] tracking-tight">World<span class="text-[#d40839] font-medium italic">Class</span></span>
                 </a>
+
+                @if(request()->is('/'))
+                    <div class="hidden md:flex space-x-4 text-xs font-semibold uppercase tracking-wider">
+                        <a href="#clima" class="text-slate-500 hover:text-[#002d55] transition py-2 px-1">
+                            <i class="bi bi-building mr-1"></i> Clima
+                        </a>
+                        <a href="#sedes" class="text-slate-500 hover:text-[#002d55] transition py-2 px-1">
+                            <i class="bi bi-building mr-1"></i> Sedes
+                        </a>
+                        <a href="#tarifas" class="text-slate-500 hover:text-[#002d55] transition py-2 px-1">
+                            <i class="bi bi-credit-card mr-1"></i> Tarifas
+                        </a>
+                    </div>
+                @endif
                 
                 @auth
                 <div class="hidden md:flex space-x-1">

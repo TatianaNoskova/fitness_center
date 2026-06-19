@@ -17,59 +17,99 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Берем первую попавшуюся sede из базы для привязки сотрудников и клиентов
-        $sedeCentral = Sede::first();
+        // Собираем все филиалы и планы, чтобы красиво распределить людей
+        $sedes = Sede::all();
+        $planes = Plan::all();
 
-        // Получаем первый доступный план для привязки к клиенту
-        $planBase = Plan::first();
+        // Фолбеки на случай, если предыдущие сидеры пустые (хотя они должны быть заполнены)
+        $sedeIds = $sedes->pluck('id')->toArray() ?: [null];
+        $planIds = $planes->pluck('id')->toArray() ?: [null];
 
-        // 1. Администратор
+        // Кэшируем хэши паролей заранее, чтобы сидер не тормозил при генерации
+        $passwordAdmin = Hash::make('admin123');
+        $passwordTrainer = Hash::make('trainer123');
+        $passwordSocio = Hash::make('socio123');
+
+        // ==========================================
+        // 1. АДМИНИСТРАТОР (1 шт.)
+        // ==========================================
         User::create([
             'nombre' => 'Carlos',
             'apellido' => 'Admin',
             'dni' => '11111111',
             'telefono' => '11223344',
             'email' => 'admin@gym.com',
-            'password' => Hash::make('admin123'),
-            'rol' => 'ADMINISTRADOR',
+            'password' => $passwordAdmin,
+            'rol' => 'ADMINISTRADOR', // Соответствует проверке в твоем шаблоне
         ]);
 
-        // 2. Тренер
-        $userEntrenador = User::create([
-            'nombre' => 'Juana',
-            'apellido' => 'Perez',
-            'dni' => '22222222',
-            'telefono' => '55667788',
-            'email' => 'trainer@gym.com',
-            'password' => Hash::make('trainer123'),
-            'rol' => 'ENTRENADOR',
-        ]);
+        // ==========================================
+        // 2. ТРЕНЕРЫ (5 шт.)
+        // ==========================================
+        $trainersData = [
+            ['Juana', 'Perez', '22222221', '1533445566', 'trainer@gym.com', 'Crossfit y Musculación'],
+            ['Mariano', 'Silva', '22222222', '1533445567', 'mariano@gym.com', 'Spinning y Cardio'],
+            ['Valentina', 'Russo', '22222223', '1533445568', 'valentina@gym.com', 'Yoga y Pilates'],
+            ['Facundo', 'Diaz', '22222224', '1533445569', 'facundo@gym.com', 'Boxeo y Functional'],
+            ['Camila', 'Torres', '22222225', '1533445570', 'camila@gym.com', 'Zumba y Ritmos'],
+        ];
 
-        Entrenador::create([
-            'user_id' => $userEntrenador->id,
-            'sede_id' => $sedeCentral ? $sedeCentral->id : null,
-            'especialidad' => 'Crossfit y Musculación',
-            'estado' => 'ACTIVO',
-        ]);
+        foreach ($trainersData as $index => $data) {
+            $user = User::create([
+                'nombre' => $data[0],
+                'apellido' => $data[1],
+                'dni' => $data[2],
+                'telefono' => $data[3],
+                'email' => $data[4],
+                'password' => $passwordTrainer,
+                'rol' => 'ENTRENADOR',
+            ]);
 
-        // 3. Клиент (Socio) с полной поддержкой паттерна Strategy
-        $userSocio = User::create([
-            'nombre' => 'Martin',
-            'apellido' => 'Gomez',
-            'dni' => '33333333',
-            'telefono' => '99001122',
-            'email' => 'socio@gym.com',
-            'password' => Hash::make('socio123'),
-            'rol' => 'SOCIO',
-        ]);
+            Entrenador::create([
+                'user_id' => $user->id,
+                // Распределяем тренеров по существующим филиалам по очереди
+                'sede_id' => $sedeIds[$index % count($sedeIds)],
+                'especialidad' => $data[5],
+                'estado' => 'ACTIVO',
+            ]);
+        }
 
-        Socio::create([
-            'user_id' => $userSocio->id,
-            'sede_id' => $sedeCentral ? $sedeCentral->id : null, // Его "домашний" филиал
-            'plan_id' => $planBase ? $planBase->id : null,       // Привязываем к базовому плану
-            'categoria' => 'VIP',                               // Категория: NORMAL, ESTUDIANTE или VIP
-            'fecha_alta' => now()->toDateString(),
-            'estado' => 'ACTIVO',
-        ]);
+        // ==========================================
+        // 3. КЛИЕНТЫ / SOCIOS (10 шт.)
+        // ==========================================
+        $sociosData = [
+            ['Martin', 'Gomez', '33333331', '1544556611', 'socio@gym.com', 'VIP'],
+            ['Lucas', 'Rodriguez', '33333332', '1544556622', 'lucas@gym.com', 'NORMAL'],
+            ['Sofia', 'Fernandez', '33333333', '1544556633', 'sofia@gym.com', 'ESTUDIANTE'],
+            ['Mateo', 'Alvarez', '33333334', '1544556644', 'mateo@gym.com', 'NORMAL'],
+            ['Elena', 'Benitez', '33333335', '1544556655', 'elena@gym.com', 'VIP'],
+            ['Diego', 'Herrera', '33333336', '1544556666', 'diego@gym.com', 'ESTUDIANTE'],
+            ['Martina', 'Lopez', '33333337', '1544556677', 'martina@gym.com', 'NORMAL'],
+            ['Bautista', 'Gonzalez', '33333338', '1544556688', 'bautista@gym.com', 'VIP'],
+            ['Agustina', 'Romero', '33333339', '1544556699', 'agustina@gym.com', 'NORMAL'],
+            ['Nicolas', 'Castro', '33333340', '1544556700', 'nicolas@gym.com', 'ESTUDIANTE'],
+        ];
+
+        foreach ($sociosData as $index => $data) {
+            $user = User::create([
+                'nombre' => $data[0],
+                'apellido' => $data[1],
+                'dni' => $data[2],
+                'telefono' => $data[3],
+                'email' => $data[4],
+                'password' => $passwordSocio,
+                'rol' => 'SOCIO',
+            ]);
+
+            Socio::create([
+                'user_id' => $user->id,
+                // Тоже по очереди закидываем в разные филиалы и планы
+                'sede_id' => $sedeIds[$index % count($sedeIds)], 
+                'plan_id' => $planIds[$index % count($planIds)], 
+                'categoria' => $data[5], // Наш Strategy-паттерн (VIP, NORMAL, ESTUDIANTE)
+                'fecha_alta' => now()->subMonths(rand(1, 6))->toDateString(), // Реалистичная дата регистрации
+                'estado' => 'ACTIVO',
+            ]);
+        }
     }
 }

@@ -11,10 +11,10 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Получаем ID текущего авторизованного тренера
+        // Берем ID авторизованного пользователя напрямую из таблицы users
         $entrenadorId = Auth::user()->id; 
 
-        // 1. Актуальные занятия (только со статусом PROGRAMADA)
+        // 1. Актуальные занятия (ищем по user_id, сохраненному в entrenador_id)
         $clases = Clase::where('entrenador_id', $entrenadorId)
             ->where('estado', 'PROGRAMADA') // Игнорируем архивные
             ->with('socios')
@@ -33,7 +33,7 @@ class DashboardController extends Controller
         return view('entrenador.dashboard', compact('clases', 'historial'));
     }
 
-    // Метод для отметки посещаемости (остался без изменений)
+    // Метод для отметки посещаемости — полностью сохранен
     public function marcarAsistencia(Request $request, $claseId, $socioId)
     {
         $request->validate([
@@ -49,12 +49,12 @@ class DashboardController extends Controller
         return back()->with('success', 'Asistencia actualizada con éxito.');
     }
 
-    // НОВЫЙ МЕТОД: Перевод класса в историю
+    // Метод перевода класса в историю — адаптирован под прямую проверку по user_id
     public function finalizarClase($id)
     {
         $entrenadorId = Auth::user()->id;
 
-        // Находим класс, проверяя, что он принадлежит именно этому тренеру
+        // Находим класс, проверяя, что entrenador_id равен id пользователя
         $clase = Clase::where('id', $id)
             ->where('entrenador_id', $entrenadorId)
             ->firstOrFail();

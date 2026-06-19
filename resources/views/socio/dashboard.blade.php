@@ -505,6 +505,11 @@
                                         <div>
                                             <h3 class="font-bold text-[#002d55] text-lg leading-tight">{{ $clase->nombre }}</h3>
                                             <p class="text-xs text-slate-400 mt-1">{{ $clase->descripcion }}</p>
+                                                <div class="mt-2 flex items-center text-xs font-medium text-slate-600">
+                                                    <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                                        👤 Profesor: {{ $clase->entrenador && $clase->entrenador->user ? $clase->entrenador->user->nombre . ' ' . $clase->entrenador->user->apellido : 'Por asignar' }}
+                                                    </span>
+                                                </div>
                                         </div>
                                         
                                         <span class="text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider whitespace-nowrap

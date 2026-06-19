@@ -72,6 +72,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/planes', [\App\Http\Controllers\Admin\PlanesController::class, 'store'])->name('planes.store');
         Route::put('/planes/{id}', [\App\Http\Controllers\Admin\PlanesController::class, 'update'])->name('planes.update');
     });
+    });
 
     // --- 2. ДОСТУП ТОЛЬКО ДЛЯ ТРЕНЕРА ---
     Route::middleware('role:entrenador')->group(function () {

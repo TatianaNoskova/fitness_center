@@ -40,13 +40,14 @@ class DashboardController extends Controller
 
             // СЦЕНАРИЙ А: Профиль существует (Стандартный дашборд)
             // Фильтруем доступные классы для записи (исключаем прошедшие по дате и времени)
-            $clasesDisponibles = Clase::with('sede')
+            $clasesDisponibles = Clase::with(['sede', 'entrenador']) // Подгружаем и филиал, и тренера
+                ->where('estado', 'PROGRAMADA') // Показываем только активные занятия (не архивные)
                 ->where(function($query) use ($hoy, $ahoraShort) {
                     $query->where('fecha', '>', $hoy)
-                          ->orWhere(function($subQuery) use ($hoy, $ahoraShort) {
-                              $subQuery->where('fecha', '=', $hoy)
-                                       ->where('hora', '>=', $ahoraShort);
-                          });
+                        ->orWhere(function($subQuery) use ($hoy, $ahoraShort) {
+                            $subQuery->where('fecha', '=', $hoy)
+                                    ->where('hora', '>=', $ahoraShort);
+                        });
                 })
                 ->orderBy('fecha')
                 ->orderBy('hora')

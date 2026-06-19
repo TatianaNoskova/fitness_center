@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             ClaseSeeder::class,
             ServicioComboSeeder::class,
+            InscripcionSeeder::class,
 
         ]);
     }
