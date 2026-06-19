@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Validator;
 use App\Models\Clase;
 use App\Models\Sede;
 use App\Models\Entrenador; 
@@ -37,10 +37,10 @@ public function index(Request $request)
     ]);
 }
 
-
-    public function store(Request $request)
+public function store(Request $request)
 {
-    $data = $request->validate([
+    // 1. Ручная валидация вместо автоматической
+    $validator = Validator::make($request->all(), [
         'nombre' => 'required|string|max:100',
         'descripcion' => 'nullable|string',
         'fecha' => 'required|date|after_or_equal:today',
@@ -50,23 +50,29 @@ public function index(Request $request)
         'sede_id' => 'required|exists:sedes,id', 
     ]);
 
+    if ($validator->fails()) {
+        return redirect()->route('admin.clases.index', [
+            'open_create' => 1, 
+            'selected_sede_id' => $request->sede_id
+        ])->withErrors($validator)->withInput();
+    }
+
+    $data = $validator->validated();
+
+    // ПРОВЕРКА: Если тренер занят
+    if (Clase::esEntrenadorOcupado($data['entrenador_id'], $data['fecha'], $data['hora'])) {
+        return redirect()->route('admin.clases.index', [
+            'open_create' => 1, 
+            'selected_sede_id' => $request->sede_id
+        ])
+        ->withInput()
+        ->withErrors(['entrenador_id' => 'El entrenador ya tiene asignada otra clase en esa misma fecha y hora.']);
+    }
+
     Clase::crearClase($data);
 
     return redirect()->route('admin.clases.index', ['selected_sede_id' => $request->sede_id])
         ->with('success', '¡Clase creada con éxito en la sede seleccionada!');
-}
-
-public function edit($id)
-{
-    $clase = Clase::findOrFail($id);
-    $sedes = Sede::all();
-    
-    $entrenadores = Entrenador::with('user')
-        ->where('sede_id', $clase->sede_id)
-        ->where('estado', 'ACTIVO')
-        ->get();
-
-    return view('admin.clases_edit', compact('clase', 'sedes', 'entrenadores'));
 }
 
 public function update(Request $request, $id)
@@ -92,7 +98,15 @@ public function update(Request $request, $id)
         if ($request->has('hora')) $rules['hora'] = 'required|string';
     }
 
-    $request->validate($rules);
+    // 2. Ручная валидация при обновлении
+    $validator = Validator::make($request->all(), $rules);
+
+    if ($validator->fails()) {
+        return redirect()->route('admin.clases.index', [
+            'edit_id' => $id, 
+            'selected_sede_id' => $request->input('selected_sede_id') ?? $clase->sede_id
+        ])->withErrors($validator)->withInput();
+    }
 
     if ($tieneInscritos) {
         $finalData = [
@@ -105,7 +119,6 @@ public function update(Request $request, $id)
             'capacidad'     => $request->input('capacidad'),
         ];
     } else {
-        
         $finalData = [
             'nombre'        => $request->input('nombre'),
             'fecha'         => $request->input('fecha', $clase->fecha),
@@ -119,7 +132,16 @@ public function update(Request $request, $id)
         $finalData['sede_id'] = $entrenador->sede_id;
     }
 
-  
+    // ПРОВЕРКА ПРИ ОБНОВЛЕНИИ
+    if (Clase::esEntrenadorOcupado($finalData['entrenador_id'], $finalData['fecha'], $finalData['hora'], $clase->id)) {
+        return redirect()->route('admin.clases.index', [
+            'edit_id' => $id, 
+            'selected_sede_id' => $request->input('selected_sede_id') ?? $clase->sede_id
+        ])
+        ->withInput()
+        ->withErrors(['entrenador_id' => 'No se puede modificar: El entrenador ya tiene otra clase asignada en esa fecha y hora.']);
+    }
+
     $clase->update($finalData);
 
     $msg = $tieneInscritos 

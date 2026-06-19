@@ -9,13 +9,10 @@ class Inscripcion extends Model
 {
     use HasFactory;
 
-    protected $table = 'inscripcions'; // Явное указание имени таблицы в Laravel
+    protected $table = 'inscripcions'; 
 
     protected $fillable = ['fecha_inscripcion', 'estado', 'socio_id', 'clase_id'];
 
-    /**
-     * Связи (Relationships)
-     */
     public function socio()
     {
         return $this->belongsTo(Socio::class, 'socio_id', 'user_id');

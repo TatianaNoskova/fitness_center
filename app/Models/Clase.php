@@ -13,9 +13,6 @@ class Clase extends Model
 
     protected $fillable = ['nombre', 'descripcion', 'fecha', 'hora', 'capacidad', 'sede_id', 'entrenador_id'];
 
-    /**
-     * Связи (Relationships)
-     */
     public function sede()
     {
         return $this->belongsTo(Sede::class);
@@ -28,21 +25,17 @@ class Clase extends Model
 
     public function inscripciones()
     {
-        // Композиция: у одного занятия много записей
+        // Composición
         return $this->hasMany(Inscripcion::class, 'clase_id');
     }
 
     public function socios()
     {
-        // Оставляем только имя таблицы и внешние ключи. Laravel сам поймет первичные ключи моделей!
-        return $this->belongsToMany(Socio::class, 'clase_socio', 'clase_id', 'socio_id')
-                    ->withPivot('asistencia') // Без этого тренер не сможет читать и менять статус!
+        return $this->belongsToMany(Socio::class, 'inscripcions', 'clase_id', 'socio_id')
+                    ->withPivot('asistencia', 'estado', 'fecha_inscripcion')
                     ->withTimestamps();
     }
 
-    /**
-     * Методы из UML-диаграммы
-     */
 
     // crearClase()
     public static function crearClase(array $data)
@@ -59,18 +52,30 @@ class Clase extends Model
     // cancelarClase()
     public function cancelarClase()
     {
-        // Можно либо удалить, либо поменять статус. Пока сделаем удаление, как в CRUD
+        
         return $this->delete();
     }
 
-    // consultarDisponibilidad(): Логика проверки мест
+    // consultarDisponibilidad
     public function consultarDisponibilidad(): bool
     {
-        // Считаем сколько человек уже записалось на это занятие
+
         $anotados = $this->inscripciones()->count();
         
-        // Если записавшихся меньше, чем емкость (capacidad), значит места есть
         return $anotados < $this->capacidad;
+    }
+
+    public static function esEntrenadorOcupado($entrenadorId, $fecha, $hora, $ignoreClaseId = null)
+    {
+        $query = self::where('entrenador_id', $entrenadorId)
+                     ->where('fecha', $fecha)
+                     ->where('hora', $hora);
+
+        if ($ignoreClaseId) {
+            $query->where('id', '!=', $ignoreClaseId);
+        }
+
+        return $query->exists();
     }
 
 

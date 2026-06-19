@@ -14,10 +14,12 @@ return new class extends Migration
         Schema::create('inscripcions', function (Blueprint $table) {
             $table->id();
             $table->date('fecha_inscripcion');
-            $table->string('estado', 45)->default('CONFIRMADA'); // Например: CONFIRMADA, CANCELADA
+            $table->string('estado', 45)->default('CONFIRMADA'); 
             
-            // Связи
-            $table->foreignId('socio_id')->constrained('users')->onDelete('cascade');
+        
+            $table->string('asistencia', 15)->default('PENDIENTE'); // SI, NO, PENDIENTE
+
+            $table->foreignId('socio_id')->constrained('socios', 'user_id')->onDelete('cascade');
             $table->foreignId('clase_id')->constrained('clases')->onDelete('cascade');
             
             $table->timestamps();

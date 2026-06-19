@@ -36,7 +36,7 @@ class ClaseComposite implements ClaseComponent
     {
         $totalPrecio = 0;
 
-        // 1. Паттерн Composite обходит дерево и прозрачно суммирует базовые цены "листьев" (услуг)
+        
         foreach ($this->componentes as $componente) {
             $totalPrecio += $componente->getPrecio();
         }

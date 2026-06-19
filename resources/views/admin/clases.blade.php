@@ -198,9 +198,31 @@
                     </a>
                 </div>
 
-                <form action="{{ route('admin.clases.update', $claseParaEditar->id) }}" method="POST" class="p-4 space-y-3 text-left">
+                <form action="{{ route('admin.clases.update', [$claseParaEditar->id, 'edit_id' => request('edit_id'), 'selected_sede_id' => request('selected_sede_id')]) }}" method="POST" class="p-4 space-y-3 text-left">
                     @csrf
                     @method('PUT')
+
+                    @if ($errors->any())
+                        <div class="bg-rose-50 border border-rose-200 text-rose-800 rounded-xl p-3 text-xs font-semibold flex flex-col gap-1">
+                            <div class="flex items-center gap-2 mb-1 text-rose-600">
+                                <i class="bi bi-exclamation-triangle-fill text-sm"></i>
+                                <span class="font-bold">Por favor, corrige los siguientes errores:</span>
+                            </div>
+                            <ul class="list-disc list-inside pl-1 text-rose-700">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    {{-- Кастомный вывод ошибки коллизии тренера --}}
+                    @if(session('error_modal'))
+                        <div class="bg-rose-50 border border-rose-200 text-rose-800 rounded-xl p-3 text-xs font-semibold flex items-center gap-2">
+                            <i class="bi bi-exclamation-triangle-fill text-rose-500 text-sm"></i>
+                            <span>{{ session('error_modal') }}</span>
+                        </div>
+                    @endif
 
                     <input type="hidden" name="selected_sede_id" value="{{ request('selected_sede_id', $claseParaEditar->sede_id) }}">
                     <input type="hidden" name="sede_id" value="{{ $claseParaEditar->sede_id }}">
@@ -223,13 +245,13 @@
                             class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500/20 shadow-sm {{ $tieneInscritos ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : '' }}">
                     </div>
 
-                    {{-- Дата и Время (Добавленный блок) --}}
+                    {{-- Дата и Время --}}
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Fecha</label>
                             <input type="date" name="fecha" value="{{ old('fecha', $claseParaEditar->fecha ? \Carbon\Carbon::parse($claseParaEditar->fecha)->format('Y-m-d') : '') }}" required
                                 {{ $tieneInscritos ? 'disabled' : '' }}
-                                min="{{ date('Y-m-d') }}" {{-- Запрет прошлых дат на фронтенде --}}
+                                min="{{ date('Y-m-d') }}"
                                 class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500/20 shadow-sm {{ $tieneInscritos ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : '' }}">
                         </div>
                         <div>
@@ -336,6 +358,14 @@
             <div class="p-4">
                 @if(!$selectedSedeId)
                     {{-- ШАГ 1: ВЫБОР ФИЛИАЛА --}}
+                    @if ($errors->any())
+                        <div class="mb-4 bg-rose-50 border-l-4 border-rose-500 p-3 rounded-r-xl text-xs text-rose-800 font-medium">
+                            <i class="bi bi-exclamation-triangle-fill text-rose-500 mr-1"></i>
+                            {{ $errors->first() }}
+                        </div>
+                    @endif
+
+                    {{-- CAMBIO: Cambiado a método GET apuntando al index para actualizar los parámetros de la URL --}}
                     <form action="{{ route('admin.clases.index') }}" method="GET" class="space-y-3">
                         <input type="hidden" name="open_create" value="1">
                         
@@ -344,7 +374,9 @@
                             <select name="selected_sede_id" required class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500/20 shadow-sm">
                                 <option value="">Selecciona una sede para ver entrenadores disponibles...</option>
                                 @foreach($sedes as $sede)
-                                    <option value="{{ $sede->id }}">{{ $sede->nombre }} ({{ $sede->direccion }})</option>
+                                    <option value="{{ $sede->id }}" {{ request('selected_sede_id') == $sede->id ? 'selected' : '' }}>
+                                        {{ $sede->nombre }} ({{ $sede->direccion }})
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -363,6 +395,20 @@
                     <form action="{{ route('admin.clases.store') }}" method="POST" class="space-y-3">
                         @csrf
                         
+                        @if ($errors->any())
+                            <div class="mb-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl p-3 text-xs font-semibold flex flex-col gap-1">
+                                <div class="flex items-center gap-2 mb-1 text-rose-600">
+                                    <i class="bi bi-exclamation-triangle-fill text-sm"></i>
+                                    <span class="font-bold">Por favor, corrige los siguientes errores:</span>
+                                </div>
+                                <ul class="list-disc list-inside pl-1 text-rose-700">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
                         <input type="hidden" name="sede_id" value="{{ $selectedSedeId }}">
                         <input type="hidden" name="selected_sede_id" value="{{ $selectedSedeId }}">
 

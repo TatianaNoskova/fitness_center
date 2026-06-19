@@ -19,14 +19,12 @@ return new class extends Migration
         $table->time('hora');
         $table->integer('capacidad');
         
-        // Связь с филиалом (оставляем как у тебя)
         $table->foreignId('sede_id')->constrained('sedes')->onDelete('cascade');
         
-        // Идеальная и безопасная связь напрямую с таблицей users
         $table->foreignId('entrenador_id')
               ->nullable()
-              ->constrained('users') // Ссылаемся на главную таблицу пользователей
-              ->onDelete('set null'); // Если пользователя удалят, занятие останется без тренера
+              ->constrained('users') 
+              ->onDelete('set null'); 
 
         $table->timestamps();
     });

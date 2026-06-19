@@ -108,7 +108,6 @@
                     <p class="text-slate-500">Bienvenido, {{ auth()->user()->nombre }}. Aquí puedes gestionar tus entrenamientos y pagos.</p>
                 </div>
 
-                {{-- ПРОВЕРЯЕМ ГЛОБАЛЬНЫЙ КЭШ ОТ ОБСЕРВЕРА --}}
                 @if(\Illuminate\Support\Facades\Cache::has('alerta_clase_cancelada'))
                     <div class="mb-6 bg-rose-50 border-l-4 border-rose-500 p-4 rounded-r-2xl shadow-sm">
                         <div class="flex items-start">

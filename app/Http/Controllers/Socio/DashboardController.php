@@ -34,14 +34,36 @@ class DashboardController extends Controller
 
         // 2. РАЗВЕТВЛЕНИЕ ЛОГИКИ
         if ($socio) {
+            // Текущие дата и время (без секунд для надежного сравнения)
+            $hoy = now()->toDateString();
+            $ahoraShort = now()->format('H:i');
+
             // СЦЕНАРИЙ А: Профиль существует (Стандартный дашборд)
+            // Фильтруем доступные классы для записи (исключаем прошедшие по дате и времени)
             $clasesDisponibles = Clase::with('sede')
-                ->where('fecha', '>=', now()->toDateString())
+                ->where(function($query) use ($hoy, $ahoraShort) {
+                    $query->where('fecha', '>', $hoy)
+                          ->orWhere(function($subQuery) use ($hoy, $ahoraShort) {
+                              $subQuery->where('fecha', '=', $hoy)
+                                       ->where('hora', '>=', $ahoraShort);
+                          });
+                })
                 ->orderBy('fecha')
                 ->orderBy('hora')
                 ->get();
 
-            $misInscripciones = $socio->clases;
+            // Фильтруем ТОЛЬКО будущие или сегодняшние предстоящие записи пользователя
+            $misInscripciones = $socio->clases()
+                ->where(function($query) use ($hoy, $ahoraShort) {
+                    $query->where('fecha', '>', $hoy)
+                          ->orWhere(function($subQuery) use ($hoy, $ahoraShort) {
+                              $subQuery->where('fecha', '=', $hoy)
+                                       ->where('hora', '>=', $ahoraShort);
+                          });
+                })
+                ->orderBy('fecha')
+                ->orderBy('hora')
+                ->get();
 
             if ($socio->plan) {
                 $precioCuota = $socio->obtenerPrecioCuota(); 
@@ -80,8 +102,8 @@ class DashboardController extends Controller
             'historialPagos',
             'todosLosPlanes',
             'todasLasSedes',
-            'todosCombos',     // <-- Передали в шаблон
-            'todosServicios'   // <-- Передали в шаблон
+            'todosCombos',     
+            'todosServicios'   
         ));
     }
 
