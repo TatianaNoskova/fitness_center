@@ -79,8 +79,9 @@ Route::middleware('auth')->group(function () {
         
         // НОВАЯ СТРОЧКА: Обработка посещаемости
         Route::post('/entrenador/clases/{claseId}/socio/{socioId}/asistencia', [\App\Http\Controllers\Entrenador\DashboardController::class, 'marcarAsistencia']);
+        Route::post('/entrenador/clases/{id}/finalizar', [\App\Http\Controllers\Entrenador\DashboardController::class, 'finalizarClase'])->name('entrenador.clases.finalizar');
     });
-    });
+
 
     // --- 3. ДОСТУП ТОЛЬКО ДЛЯ КЛИЕНТА (SOCIO) ---
     Route::middleware('role:socio')->group(function () {

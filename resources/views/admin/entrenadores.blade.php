@@ -72,7 +72,7 @@
                 </td>
                 <td class="py-4 px-6">
                     <span class="inline-flex items-center px-2 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-medium">
-                        <i class="bi bi-building me-1 text-slate-400"></i> {{ $e->obedienceSede->nombre ?? 'Sin sede asignada' }}
+                        <i class="bi bi-building me-1 text-slate-400"></i> {{ $e->obedienceSede->nombre }}
                     </span>
                 </td>
                 <td class="py-4 px-6">
@@ -175,10 +175,13 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                     <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Sede Asignada</label>
-                    <select name="sede_id" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-rose-500 focus:ring-rose-500/20 shadow-sm">
-                        <option value="">Sin sede (Externo)</option>
+                    <select name="sede_id" required class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-rose-500 focus:ring-rose-500/20 shadow-sm">
+                            <option value="" disabled {{ !old('sede_id') ? 'selected' : '' }}>Selecciona una sede</option>
+                        
                         @foreach($sedes as $s)
-                            <option value="{{ $s->id }}" {{ old('sede_id') == $s->id ? 'selected' : '' }}>{{ $s->nombre }}</option>
+                            <option value="{{ $s->id }}" {{ old('sede_id') == $s->id ? 'selected' : '' }}>
+                                {{ $s->nombre }}
+                            </option>
                         @endforeach
                     </select>
                 </div>
