@@ -21,8 +21,8 @@ return new class extends Migration
                 // Relaciones
                 $table->foreignId('socio_id')->constrained('users')->onDelete('cascade');
                 $table->foreignId('plan_id')->nullable()->constrained()->onDelete('cascade');
-                $table->foreignId('combo_id')->nullable();
-                $table->foreignId('servicio_id')->nullable();                
+                $table->foreignId('combo_id')->nullable()->constrained('combos')->onDelete('set null');
+                $table->foreignId('servicio_id')->nullable()->constrained('servicios')->onDelete('set null');         
                 $table->timestamps();
             });
         }
