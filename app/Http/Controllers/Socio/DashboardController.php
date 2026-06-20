@@ -7,8 +7,8 @@ use App\Models\Socio;
 use App\Models\Clase;
 use App\Models\Sede; 
 use App\Models\Plan; 
-use App\Models\Combo;    // <-- ДОБАВИТЬ ЭТУ СТРОКУ
-use App\Models\Servicio; // <-- Рекомендую сразу добавить и её, если ниже используется Servicio
+use App\Models\Combo;    
+use App\Models\Servicio; 
 use App\Models\Pago;
 use Illuminate\Http\Request;
 
@@ -16,15 +16,14 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // 1. Ищем профиль клиента по user_id
         $socio = Socio::with(['sede', 'plan'])
             ->where('user_id', auth()->id())
             ->first();
 
+            
+
         $todosCombos = \App\Models\Combo::with('servicios')->get();
         $todosServicios = \App\Models\Servicio::get();
-
-        // Инициализируем переменные по умолчанию
         $clasesDisponibles = collect();
         $misInscripciones = collect();
         $precioCuota = 0;
@@ -32,16 +31,12 @@ class DashboardController extends Controller
         $todosLosPlanes = collect();
         $todasLasSedes = collect();
 
-        // 2. РАЗВЕТВЛЕНИЕ ЛОГИКИ
         if ($socio) {
-            // Текущие дата и время (без секунд для надежного сравнения)
             $hoy = now()->toDateString();
             $ahoraShort = now()->format('H:i');
 
-            // СЦЕНАРИЙ А: Профиль существует (Стандартный дашборд)
-            // Фильтруем доступные классы для записи (исключаем прошедшие по дате и времени)
-            $clasesDisponibles = Clase::with(['sede', 'entrenador']) // Подгружаем и филиал, и тренера
-                ->where('estado', 'PROGRAMADA') // Показываем только активные занятия (не архивные)
+            $clasesDisponibles = Clase::with(['sede', 'entrenador']) 
+                ->where('estado', 'PROGRAMADA') 
                 ->where(function($query) use ($hoy, $ahoraShort) {
                     $query->where('fecha', '>', $hoy)
                         ->orWhere(function($subQuery) use ($hoy, $ahoraShort) {
@@ -53,7 +48,6 @@ class DashboardController extends Controller
                 ->orderBy('hora')
                 ->get();
 
-            // Фильтруем ТОЛЬКО будущие или сегодняшние предстоящие записи пользователя
             $misInscripciones = $socio->clases()
                 ->where(function($query) use ($hoy, $ahoraShort) {
                     $query->where('fecha', '>', $hoy)
@@ -69,12 +63,10 @@ class DashboardController extends Controller
             if ($socio->plan) {
                 $precioCuota = $socio->obtenerPrecioCuota(); 
 
-                // Получаем ВСЕ платежи этого пользователя из базы через модель Pago
                 $historialPagos = \App\Models\Pago::where('socio_id', $socio->user_id)
                     ->orderBy('id', 'desc')
                     ->get();
 
-                // Если у пользователя вообще нет платежей, автоматически создаем первый (PENDIENTE)
                 if ($historialPagos->isEmpty()) {
                     $primerPago = \App\Models\Pago::create([
                         'fecha'       => now()->toDateString(),
@@ -85,12 +77,11 @@ class DashboardController extends Controller
                         'plan_id'     => $socio->plan_id,
                     ]);
 
-                    // Помещаем созданный платеж в коллекцию для отображения
                     $historialPagos = collect([$primerPago]);
                 }
             }
         } else {
-            // СЦЕНАРИЙ Б: Профиля нет (Пользователь только зарегистрировался)
+        
             $todasLasSedes = Sede::all();
             $todosLosPlanes = Plan::all();
         }
@@ -108,7 +99,6 @@ class DashboardController extends Controller
         ));
     }
 
-    // Создание профиля из формы онбординга
     public function crearPerfil(Request $request)
     {
         $request->validate([
@@ -129,7 +119,6 @@ class DashboardController extends Controller
         return redirect()->route('socio.dashboard')->with('success', '¡Tu perfil ha sido activado! Bienvenido a WorldClass.');
     }
 
-    // МЕТОД ОПЛАТЫ: Выполняет валидацию и проведение платежа
     public function pagarCuota($id)
     {
         $pago = \App\Models\Pago::findOrFail($id);
@@ -144,11 +133,6 @@ class DashboardController extends Controller
             ->with('error', 'No se pudo validar el pago. Verifique los datos.');
     }
 
-    // --- НАШИ НОВЫЕ МЕТОДЫ, КОТОРЫХ НЕ ХВАТАЛО ---
-
-    /**
-     * Запись Мартина на занятие (использует логику из твоей модели)
-     */
     public function inscribir($id)
     {
         try {
@@ -159,20 +143,16 @@ class DashboardController extends Controller
                 return redirect()->back()->with('error', 'No tienes un perfil de socio activo.');
             }
 
-            // Вызываем бизнес-метод твоей модели!
             $socio->inscribirseAClase($clase);
 
             return redirect()->route('socio.dashboard')->with('success', '¡Te has inscrito en la clase con éxito!');
             
         } catch (\Exception $e) {
-            // Перехватываем ошибки валидации из модели (места кончились, подписка не активна и т.д.)
+
             return redirect()->route('socio.dashboard')->with('error', $e->getMessage());
         }
     }
 
-    /**
-     * Отмена записи Мартина на занятие (использует логику из твоей модели)
-     */
     public function cancelar($id)
     {
         try {
@@ -183,7 +163,6 @@ class DashboardController extends Controller
                 return redirect()->back()->with('error', 'No tienes un perfil de socio activo.');
             }
 
-            // Вызываем второй бизнес-метод твоей модели!
             $socio->cancelarInscripcion($clase);
 
             return redirect()->route('socio.dashboard')->with('success', 'Inscripción cancelada con éxito.');
@@ -196,7 +175,6 @@ class DashboardController extends Controller
 
     public function contratarExtras(Request $request)
     {
-        // 1. Получаем массивы ID из формы
         $comboIds = $request->input('combos', []);
         $servicioIds = $request->input('servicios', []);
 
@@ -204,16 +182,12 @@ class DashboardController extends Controller
             return redirect()->back()->with('error', 'Por favor, selecciona al menos un servicio o combo.');
         }
 
-        // 2. Ищем профиль socio
         $socio = Socio::where('user_id', auth()->id())->first();
 
         if (!$socio) {
             return redirect()->back()->with('error', 'No se encontró el perfil de socio.');
         }
 
-        // --- КЛЮЧЕВОЙ МОМЕНТ: СОЗДАЕМ ОТДЕЛЬНЫЕ СТРОЧКИ ---
-
-        // 3. Создаем отдельные платежи для каждой ОДИНОЧНОЙ услуги
         if (!empty($servicioIds)) {
             $servicios = Servicio::whereIn('id', $servicioIds)->get();
             
@@ -225,19 +199,18 @@ class DashboardController extends Controller
                     'estado'      => 'PENDIENTE',
                     'socio_id'    => $socio->user_id,
                     'plan_id'     => null, 
-                    'combo_id'    => null,        // Для услуги комбо = null
-                    'servicio_id' => $servicio->id, // <--- СВЯЗАЛИ С ОДИНОЧНОЙ УСЛУГОЙ!
+                    'combo_id'    => null,        
+                    'servicio_id' => $servicio->id,
                      
                 ]);
             }
         }
 
-        // 4. Создаем отдельные платежи для каждого КОМБО
         if (!empty($comboIds)) {
             $combos = Combo::with('servicios')->whereIn('id', $comboIds)->get();
             
             foreach ($combos as $combo) {
-                $precioCombo = $combo->precio_calculado; // Твой паттерн Composite
+                $precioCombo = $combo->precio_calculado; 
 
                 Pago::create([
                     'fecha'       => now()->toDateString(),
@@ -246,8 +219,8 @@ class DashboardController extends Controller
                     'estado'      => 'PENDIENTE',
                     'socio_id'    => $socio->user_id,
                     'plan_id'     => null, 
-                    'combo_id'    => $combo->id,    // <--- СВЯЗАЛИ С КОМБО-ПАКЕТОМ!
-                    'servicio_id' => null,          // Для комбо одиночная услуга = null
+                    'combo_id'    => $combo->id,   
+                    'servicio_id' => null,       
                 
                 ]);
             }
@@ -257,18 +230,18 @@ class DashboardController extends Controller
     }
 
     public function cancelarPago($id)
-{
-    // Ищем платеж, принадлежащий именно текущему пользователю и со статусом PENDIENTE
-    $pago = Pago::where('id', $id)
-        ->where('socio_id', auth()->id())
-        ->where('estado', 'PENDIENTE')
-        ->first();
+    {
 
-    if ($pago) {
-        $pago->delete();
-        return redirect()->back()->with('success', 'El servicio extra fue cancelado correctamente.');
+        $pago = Pago::where('id', $id)
+            ->where('socio_id', auth()->id())
+            ->where('estado', 'PENDIENTE')
+            ->first();
+
+        if ($pago) {
+            $pago->delete();
+            return redirect()->back()->with('success', 'El servicio extra fue cancelado correctamente.');
+        }
+
+        return redirect()->back()->with('error', 'No se pudo cancelar этот платеж.');
     }
-
-    return redirect()->back()->with('error', 'No se pudo cancelar этот платеж.');
-}
 }

@@ -114,7 +114,7 @@
                         </a>
 
                         <form action="{{ route('admin.socios.forceDelete', $socio->user_id) }}" method="POST" 
-                            onsubmit="return confirm('¿Está seguro de que желает ELIMINAR permanentemente a este socio? Esta acción no se puede deshacer. (Nota: Si solo desea suspenderlo temporalmente, cambie su estado a INACTIVO en la pantalla de Editar).');" 
+                            onsubmit="return confirm('¿Está seguro de que quiere ELIMINAR permanentemente a este socio? Esta acción no se puede deshacer. (Nota: Si solo desea suspenderlo temporalmente, cambie su estado a INACTIVO en la pantalla de Editar).');" 
                             class="inline-block">
                             @csrf
                             @method('DELETE')

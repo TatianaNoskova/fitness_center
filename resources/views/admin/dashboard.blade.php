@@ -98,13 +98,13 @@
         </div>
     </div>
 
-        {{-- КАРТОЧКА НОВОГО РАЗДЕЛА: КОМБО И ДОП. УСЛУГИ (COMPOSITE) --}}
+        {{-- COMBO & SERVICIOS EXTRA (COMPOSITE) --}}
     <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition flex flex-col justify-between">
         <div class="flex items-start justify-between">
             <div>
                 <span class="text-xs font-semibold uppercase tracking-wider text-emerald-600">Constructor</span>
                 <h3 class="text-xl font-bold text-slate-800 mt-1">Servicios Extras (Combos)</h3>
-                <p class="text-sm text-slate-500 mt-2">Gestión de servicios extras и создание пакетов комбинированных услуг.</p>
+                <p class="text-sm text-slate-500 mt-2">Gestión de servicios extras & Combos.</p>
             </div>
             <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
                 <i class="bi bi-diagram-3 text-xl"></i>

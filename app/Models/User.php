@@ -51,12 +51,10 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Проверка роли пользователя (для RBAC)
-     */
+    
     public function hasRole(string $role): bool
     {
-        // Приводим к нижнему регистру, чтобы избежать ошибок с 'Socio' vs 'socio'
+      
         return strtolower($this->rol) === strtolower($role);
     }
 

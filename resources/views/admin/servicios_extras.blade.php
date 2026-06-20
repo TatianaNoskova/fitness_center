@@ -3,20 +3,16 @@
 @section('content')
 <div class="max-w-7xl mx-auto px-4 py-8">
     
-    {{-- Кнопка возврата на Дашборд --}}
     <div class="mb-4">
         <a href="{{ url('/dashboard') }}" class="text-xs font-bold text-slate-500 hover:text-[#002d55] transition flex items-center gap-1">
             <i class="bi bi-arrow-left"></i> Volver al Dashboard
         </a>
     </div>
     
-    {{-- ==================== ДЕМОНСТРАЦИЯ PATTERN COMPOSITE ==================== --}}
     <div class="mb-8 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 p-6 rounded-2xl shadow-sm">
         
-        {{-- БЛОК КНОПОК / ФОРМ СОЗДАНИЯ (Элементы управления архитектурой) --}}
         <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-emerald-100 pb-6">
             
-            {{-- 1. ФОРМА СОЗДАНИЯ НОВОЙ УСЛУГИ (LEAF) --}}
             <div class="bg-white/60 border border-emerald-200/60 p-4 rounded-xl flex flex-col justify-between">
                 <h5 class="text-xs font-bold text-emerald-950 uppercase tracking-wider mb-3">
                     <i class="bi bi-plus-circle-fill text-emerald-600 mr-1"></i> 1. Crear Nuevo Servicio Individual (Leaf)
@@ -39,12 +35,11 @@
                 </form>
             </div>
 
-            {{-- 2. ФОРМА СОЗДАНИЯ НОВОГО КОМБО-ПАКЕТА (COMPOSITE) --}}
             <div class="bg-white/60 border border-emerald-200/60 p-4 rounded-xl flex flex-col justify-between">
                 <h5 class="text-xs font-bold text-emerald-950 uppercase tracking-wider mb-3">
                     <i class="bi bi-folder-plus text-emerald-600 mr-1"></i> 2. Crear Nuevo Combo Vacío (Composite)
                 </h5>
-                {{-- ИСПРАВЛЕНО: Изменили сетку формы, чтобы красиво уместить инпут скидки --}}
+                
                 <form action="{{ route('composite.combo.store') }}" method="POST" class="flex flex-col sm:flex-row gap-2 items-end">
                     @csrf
                     <div class="flex-1 space-y-1 w-full">
@@ -52,7 +47,7 @@
                         <input type="text" name="nombre" placeholder="Ej. Combo Boxeo & Cardio, VIP Festivo..." required
                                class="w-full bg-white border border-slate-200 text-xs px-3 py-1.5 rounded-lg text-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500">
                     </div>
-                    {{-- ДОБАВЛЕНО ПОЛЕ ДЛЯ СКИДКИ --}}
+                
                     <div class="w-full sm:w-20 space-y-1">
                         <label class="text-[9px] font-bold text-slate-500 uppercase tracking-wide block">Desc. (%)</label>
                         <input type="number" name="descuento" placeholder="0" min="0" max="100" value="0" required
@@ -66,7 +61,6 @@
 
         </div>
 
-        {{-- ШАПКА ТЕКУЩЕГО КОМБО И ИТОГОВАЯ ЦЕНА --}}
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
             <div class="space-y-1 flex-1">
                 <div class="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -74,7 +68,6 @@
                         Servicios Complejos
                     </h4>
                     
-                    {{-- СЕЛЕКТОР ДЛЯ ДИНАМИЧЕСКОГО ПЕРЕКЛЮЧЕНИЯ МЕЖДУ РАЗНЫМИ КОМБО --}}
                     <form action="{{ url()->current() }}" method="GET" id="combo-selector-form" class="w-full sm:w-auto">
                         <select name="combo_id" onchange="document.getElementById('combo-selector-form').submit()" class="bg-white border border-emerald-200 text-emerald-800 text-xs px-3 py-1.5 rounded-xl font-medium shadow-2xs focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer">
                             @foreach($todosLosCombos as $c)
@@ -85,13 +78,11 @@
                         </select>
                     </form>
                 </div>
-                
-                {{-- Динамическое имя текущего выбранного Композита с подсчетом услуг и скидкой от паттерна --}}
+                               
                 <p class="text-xl font-extrabold text-slate-900 pt-2">
                     <i class="bi bi-gift-fill text-emerald-500 mr-1.5"></i> {{ $comboServicios->getNombre() }}
                 </p>
                 
-                {{-- Динамический вывод состава комбо через связи --}}
                 <div class="pt-2 flex flex-wrap gap-2">
                     @foreach($comboModel->servicios as $s)
                         <span class="bg-emerald-100/80 border border-emerald-200 text-emerald-800 text-xs px-3 py-1 rounded-lg font-medium shadow-2xs">
@@ -102,7 +93,6 @@
                         <span class="text-xs text-slate-400 italic">El combo está vacío. ¡Agrega servicios abajo!</span>
                     @endif
 
-                    {{-- ВИЗУАЛЬНЫЙ БЕЙДЖ ДЛЯ СКИДКИ (если она больше 0) --}}
                     @if($comboModel->descuento > 0 && !$comboModel->servicios->isEmpty())
                         <span class="bg-amber-100 border border-amber-200 text-amber-800 text-xs px-3 py-1 rounded-lg font-bold shadow-2xs animate-pulse">
                             <i class="bi bi-tags-fill text-amber-600 mr-1"></i> Descuento del {{ $comboModel->descuento }}% aplicado
@@ -111,18 +101,15 @@
                 </div>
             </div>
 
-            {{-- Динамический расчет цены Композита --}}
             <div class="bg-white px-6 py-4 rounded-xl border border-emerald-100 text-center shadow-xs min-w-[180px] self-stretch lg:self-center flex flex-col justify-center">
                 <span class="text-[10px] uppercase tracking-widest text-slate-400 font-bold block">Precio Calculated</span>
                 
-                {{-- СТАРЯ ЦЕНА БЕЗ СКИДКИ (перечеркнутая, если скидка есть) --}}
                 @if($comboModel->descuento > 0 && !$comboModel->servicios->isEmpty())
                     <span class="text-xs text-rose-500 line-through font-semibold block -mb-1">
                         ${{ number_format($comboModel->servicios->sum('precio'), 2) }}
                     </span>
                 @endif
 
-                {{-- Итоговая цена, посчитанная через $comboServicios->getPrecio() --}}
                 <span class="text-3xl font-black text-emerald-600">
                     ${{ number_format($comboServicios->getPrecio(), 2) }}
                 </span>
@@ -130,7 +117,6 @@
             </div>
         </div>
 
-        {{-- ТАБЛИЦА-КОНСТРУКТОР (НАПОЛНЕНИЕ КОМБО) --}}
         <div class="mt-6 pt-6 border-t border-emerald-100">
             <h5 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">
                 <i class="bi bi-sliders mr-1"></i> Gestor de Configuración del Combos
@@ -171,7 +157,6 @@
         </div>
 
     </div>
-    {{-- ==================== КОНЕЦ ДЕМОНСТРАЦИИ ==================== --}}
 
 </div>
 @endsection

@@ -16,13 +16,11 @@ class ClaseLeaf implements ClaseComponent
 
     public function getNombre(): string
     {
-        // Динамически берем имя из поля в базе данных
         return $this->servicio->nombre;
     }
 
     public function getPrecio(): float
     {
-        // Динамически берем цену из поля в базе данных и приводим к числу
         return (float)$this->servicio->precio;
     }
 }

@@ -16,7 +16,6 @@ return new class extends Migration
         $table->foreignId('sede_id')->nullable()->constrained('sedes')->onDelete('set null');
         $table->foreignId('plan_id')->nullable()->constrained('plans', 'id')->onDelete('set null');
         
-        // Добавляем категорию (статус) клиента: NORMAL, ESTUDIANTE или VIP
         $table->string('categoria', 20)->default('NORMAL');
         
         $table->date('fecha_alta');

@@ -11,7 +11,7 @@ class Clase extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nombre', 'descripcion', 'fecha', 'hora', 'capacidad', 'sede_id', 'entrenador_id'];
+    protected $fillable = ['nombre', 'descripcion', 'fecha', 'hora', 'capacidad', 'sede_id', 'entrenador_id', 'estado'];
 
     public function sede()
     {
@@ -78,6 +78,10 @@ class Clase extends Model
         return $query->exists();
     }
 
+    public function finalizar()
+    {
+        return $this->update(['estado' => 'FINALIZADA']);
+    }
 
 
 

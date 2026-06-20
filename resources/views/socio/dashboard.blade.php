@@ -4,7 +4,7 @@
 <div class="container mx-auto px-4 py-8">
 
     @if(!$socio)
-        {{-- ==================== ЭКРАН ОНБОРДИНГА (ПРОФИЛЯ НЕТ) ==================== --}}
+        {{-- ==================== ONBOARDING ==================== --}}
         <div class="max-w-4xl mx-auto bg-white p-8 rounded-3xl border border-slate-200 shadow-xl mt-10">
             
             <div class="text-center max-w-xl mx-auto mb-10">
@@ -20,7 +20,7 @@
             <form action="/socio/crear-perfil" method="POST">
                 @csrf
 
-                {{-- ШАГ 1: Выбор категории --}}
+                {{-- PASO 1: ELEGIR CATEGORIA --}}
                 <div class="mb-8">
                     <label class="block text-sm font-bold text-[#002d55] uppercase tracking-wider mb-2">
                         1. Selecciona tu Condición / Categoría de Socio
@@ -35,7 +35,7 @@
                     </p>
                 </div>
 
-                {{-- ШАГ 2: Выбор филиала (Sede) --}}
+                {{-- PASO 2: ElegirSede --}}
                 <div class="mb-8">
                     <label class="block text-sm font-bold text-[#002d55] uppercase tracking-wider mb-2">
                         2. Selecciona tu Sede Principal (Gimnasio Destinado)
@@ -48,7 +48,7 @@
                     </select>
                 </div>
 
-                {{-- ШАГ 3: Выбор тарифного плана (Plan) --}}
+                {{-- PASO 3: Elegir Plan --}}
                 <div class="mb-8">
                     <label class="block text-sm font-bold text-[#002d55] uppercase tracking-wider mb-4">
                         3. Selecciona tu Plan de Membresía (Precio Base)
@@ -71,7 +71,6 @@
                     </div>
                 </div>
 
-                {{-- Кнопка отправки --}}
                 <div class="text-center mt-10">
                     <button type="submit" class="bg-[#d40839] hover:bg-[#b0062e] text-white text-sm font-bold px-10 py-4 rounded-xl transition duration-150 uppercase tracking-wider shadow-md">
                         Activar mi Cuenta de Socio
@@ -80,10 +79,9 @@
             </form>
         </div>
     @else
-        {{-- ==================== СТАНДАРТНЫЙ РАБОЧИЙ ДАШБОРД ==================== --}}
+        {{-- ==================== DASHBOARD ==================== --}}
         <div class="space-y-10">
 
-            {{-- Блок уведомлений --}}
             @if(session('success'))
                 <a href="{{ request()->url() }}" class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-2xl flex items-center justify-between shadow-sm hover:bg-emerald-100 transition duration-150 block no-underline" title="Click para cerrar">
                     <div class="flex items-center space-x-2">
@@ -101,7 +99,6 @@
                 </div>
             @endif
             
-            {{-- Шапка дашборда --}}
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 class="text-3xl font-bold text-[#002d55]">Mi Panel de Socio</h1>
@@ -140,7 +137,7 @@
                         <p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Sede Principal</p>
                         <p class="font-medium text-slate-600">{{ $socio->sede->nombre ?? 'No asignada' }}</p>
                     </div>
-                    {{-- Добавляем отображение категории прямо в виджет шапки --}}
+                 
                     <div class="border-l border-slate-100 pl-4">
                         <p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Categoría</p>
                         <span class="text-xs font-bold px-2.5 py-0.5 rounded-full inline-block mt-0.5
@@ -153,13 +150,11 @@
                 </div>
             </div>
 
-            {{-- Сетка колонок --}}
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
-                {{-- ЛЕВАЯ КОЛОНКА (Записи, Твои тарифы и Платежи) --}}
+                {{-- COLUMNA IZQUIERDA --}}
                 <div class="lg:col-span-2 space-y-10">
                     
-                    {{-- ДИНАМИЧЕСКАЯ КАРТОЧКА СТРАТЕГИИ ТАРИФА (Новый блок преимуществ) --}}
                     <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
                         <div class="p-6 @if($socio->categoria === 'VIP') bg-gradient-to-r from-amber-500 to-amber-600 text-white @elseif($socio->categoria === 'ESTUDIANTE') bg-gradient-to-r from-sky-500 to-sky-600 text-white @else bg-gradient-to-r from-[#002d55] to-[#004077] text-white @endif">
                             <div class="flex justify-between items-center">
@@ -179,7 +174,6 @@
                                 <div><strong>Precio base regular:</strong> ${{ number_format($socio->plan->precio, 2) }}</div>
                             </div>
                             
-                            {{-- Описание математики стратегии --}}
                             <div class="text-sm">
                                 @if($socio->categoria === 'ESTUDIANTE')
                                     <p class="text-emerald-600 font-medium flex items-center">
@@ -196,14 +190,12 @@
                                 @endif
                             </div>
 
-                            {{-- Динамический список преимуществ --}}
                             <div class="pt-2">
                                 <h4 class="text-xs font-bold uppercase tracking-wider text-[#002d55] mb-2.5">Beneficios de tu suscripción activa:</h4>
                                 <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-medium text-slate-600">
                                     <li class="flex items-center text-emerald-600"><i class="bi bi-check-circle-fill mr-2"></i> Sala de musculación y cardio</li>
                                     <li class="flex items-center text-emerald-600"><i class="bi bi-check-circle-fill mr-2"></i> Reserva de clases en Sede {{ $socio->sede->nombre }}</li>
                                     
-                                    {{-- Дополнительные VIP плюшки --}}
                                     @if($socio->categoria === 'VIP')
                                         <li class="flex items-center text-amber-600 font-bold"><i class="bi bi-star-fill mr-2"></i> Acceso Libre a TODAS las Sedes</li>
                                         <li class="flex items-center text-amber-600 font-bold"><i class="bi bi-star-fill mr-2"></i> Zona de Spa & Sauna Exclusiva</li>
@@ -215,7 +207,6 @@
                         </div>
                     </div>
 
-                    {{-- Классы пользователя --}}
                     <div class="space-y-4">
                         <h2 class="text-xl font-bold text-[#002d55] flex items-center">
                             <i class="bi bi-calendar-check mr-2 text-[#d40839]"></i> Mis Próximas Clases
@@ -383,7 +374,7 @@
     </form>
 </div>
 
-                    {{-- Муляж истории платежей --}}
+                    
                     <div class="space-y-4">
                         <div class="flex justify-between items-center">
                             <h2 class="text-xl font-bold text-[#002d55] flex items-center">
@@ -451,7 +442,7 @@
                                     </form>
 
                                     @if(!$pago->plan_id)
-                                        {{-- Если это ДОП. УСЛУГА или КОМБО — показываем корзину --}}
+                                        
                                         <form action="{{ route('socio.cancelarPago', $pago->id) }}" method="POST" class="inline-block m-0" onsubmit="return confirm('¿Estás seguro de que deseas quitar este servicio extra?');">
                                             @csrf
                                             @method('DELETE')
@@ -460,8 +451,7 @@
                                             </button>
                                         </form>
                                     @else
-                                        {{-- Если это ПЛАН (удалять нельзя) — ставим невидимый блок шириной с корзину --}}
-                                        {{-- Это удержит кнопку Pagar на своём месте и не даст ей сместиться! --}}
+                                     
                                         <div class="w-8 h-8 invisible"></div>
                                     @endif
                                 @else
@@ -487,7 +477,7 @@
                     </div>
                 </div>
 
-                {{-- ПРАВАЯ КОЛОНКА (Доступные классы всей сети) --}}
+                {{-- COLUMNA DERECHA }}
                 <div class="space-y-6">
                     <h2 class="text-xl font-bold text-[#002d55] flex items-center">
                         <i class="bi bi-plus-circle mr-2 text-[#d40839]"></i> Clases Disponibles (Toda la Red)
@@ -535,7 +525,7 @@
                                             Agotado (Sin cupos)
                                         </button>
                                     @else
-                                        {{-- Проверка на VIP-права или соответствие родному филиалу при записи --}}
+                                        {{-- Validación de privilegios VIP o correspondencia con la sucursal --}}
                                         @if($socio->categoria === 'VIP' || $clase->sede_id == $socio->sede_id)
                                             <form action="/clases/{{ $clase->id }}/inscribir" method="POST">
                                                 @csrf

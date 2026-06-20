@@ -11,7 +11,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Запускаем строго по порядку, чтобы не нарушать связи foreign keys!
+        
         $this->call([
             SedeSeeder::class,
             PlanSeeder::class,

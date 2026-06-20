@@ -35,7 +35,7 @@
 {{-- HEADER --}}
 <div class="flex justify-between items-center mb-8">
     <div>
-        <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Nuestras Sedes (Филиалы)</h1>
+        <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Nuestras Sedes</h1>
         <p class="text-slate-500 mt-1">Lista de sedes activas del club, sus ubicaciones y cantidad de socios.</p>
     </div>
     <a href="{{ route('admin.sedes.index', ['open_create' => 1]) }}" 

@@ -9,7 +9,7 @@ class PlanSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Полный безлимит для всех
+    
         Plan::create([
             'nombre' => 'Plan Pase Libre',
             'descripcion' => 'Acceso ilimitado a todas las sedes, sala de musculación y clases',

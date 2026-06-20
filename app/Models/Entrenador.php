@@ -9,12 +9,10 @@ class Entrenador extends Model
 {
     use HasFactory;
 
-    // Указываем родную таблицу
     protected $table = 'entrenadors'; 
 
-    // Так как стандартного 'id' нет, настраиваем кастомный первичный ключ
     protected $primaryKey = 'user_id'; 
-    public $incrementing = false; // Исправлено: убраны круглые скобки
+    public $incrementing = false; 
 
     protected $fillable = ['user_id', 'sede_id', 'especialidad', 'estado'];
 

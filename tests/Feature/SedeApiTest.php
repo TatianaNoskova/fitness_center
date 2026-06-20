@@ -14,7 +14,7 @@ class SedeApiTest extends TestCase
     /** @test */
     public function it_can_list_all_sedes_through_the_api()
     {
-        // 1. GIVEN (Дано): Создаем тестовый филиал в изолированной БД
+        // 1. GIVEN
         Sede::create([
             'nombre' => 'Sede Palermo Test',
             'direccion' => 'Av. Santa Fe 1234',
@@ -22,10 +22,10 @@ class SedeApiTest extends TestCase
             'email' => 'palermo@test.com'
         ]);
 
-        // 2. WHEN (Когда): Делаем эмулированный HTTP-запрос к нашему API
+        // 2. WHEN
         $response = $this->getJson('/api/sedes');
 
-        // 3. THEN (Тогда): Проверяем соответствие контракту (код 200 и JSON)
+        // 3. THEN 
         $response->assertStatus(200); 
         
         $response->assertJsonFragment([

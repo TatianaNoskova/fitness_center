@@ -9,25 +9,20 @@ class Plan extends Model
 {
     use HasFactory;
 
-    // Защищаем поле id, остальные разрешаем заполнять
     protected $fillable = ['nombre', 'descripcion', 'precio', 'duracion', 'estado'];
 
-    /**
-     * Связи (Relationships)
-     */
+    
     public function pagos()
     {
         return $this->hasMany(Pago::class, 'plan_id');
     }
 
-    /**
-     * Методы из UML-диаграммы
-     */
+    
 
     // registrarPlan()
     public static function registrarPlan(array $data)
     {
-        $data['estado'] = 'ACTIVO'; // По умолчанию новый план активен
+        $data['estado'] = 'ACTIVO'; 
         return self::create($data);
     }
 

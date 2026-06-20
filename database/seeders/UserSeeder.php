@@ -17,21 +17,19 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Собираем все филиалы и планы, чтобы красиво распределить людей
+    
         $sedes = Sede::all();
         $planes = Plan::all();
 
-        // Фолбеки на случай, если предыдущие сидеры пустые (хотя они должны быть заполнены)
         $sedeIds = $sedes->pluck('id')->toArray() ?: [null];
         $planIds = $planes->pluck('id')->toArray() ?: [null];
 
-        // Кэшируем хэши паролей заранее, чтобы сидер не тормозил при генерации
         $passwordAdmin = Hash::make('admin123');
         $passwordTrainer = Hash::make('trainer123');
         $passwordSocio = Hash::make('socio123');
 
         // ==========================================
-        // 1. АДМИНИСТРАТОР (1 шт.)
+        // 1. ADMIN (1 persona)
         // ==========================================
         User::create([
             'nombre' => 'Carlos',
@@ -40,11 +38,11 @@ class UserSeeder extends Seeder
             'telefono' => '11223344',
             'email' => 'admin@gym.com',
             'password' => $passwordAdmin,
-            'rol' => 'ADMINISTRADOR', // Соответствует проверке в твоем шаблоне
+            'rol' => 'ADMINISTRADOR', 
         ]);
 
         // ==========================================
-        // 2. ТРЕНЕРЫ (5 шт.)
+        // 2. ENTRENADORES (5 personas)
         // ==========================================
         $trainersData = [
             ['Juana', 'Perez', '22222221', '1533445566', 'trainer@gym.com', 'Crossfit y Musculación'],
@@ -75,7 +73,7 @@ class UserSeeder extends Seeder
         }
 
         // ==========================================
-        // 3. КЛИЕНТЫ / SOCIOS (10 шт.)
+        // 3. SOCIOS (10 personas)
         // ==========================================
         $sociosData = [
             ['Martin', 'Gomez', '33333331', '1544556611', 'socio@gym.com', 'VIP'],
@@ -103,11 +101,10 @@ class UserSeeder extends Seeder
 
             Socio::create([
                 'user_id' => $user->id,
-                // Тоже по очереди закидываем в разные филиалы и планы
                 'sede_id' => $sedeIds[$index % count($sedeIds)], 
                 'plan_id' => $planIds[$index % count($planIds)], 
-                'categoria' => $data[5], // Наш Strategy-паттерн (VIP, NORMAL, ESTUDIANTE)
-                'fecha_alta' => now()->subMonths(rand(1, 6))->toDateString(), // Реалистичная дата регистрации
+                'categoria' => $data[5], 
+                'fecha_alta' => now()->subMonths(rand(1, 6))->toDateString(), 
                 'estado' => 'ACTIVO',
             ]);
         }

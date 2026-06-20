@@ -6,6 +6,6 @@ class SocioNormalStrategy implements CuotaStrategy
 {
     public function calcular(float $basePrice): float
     {
-        return $basePrice; // Без скидок
+        return $basePrice; 
     }
 }

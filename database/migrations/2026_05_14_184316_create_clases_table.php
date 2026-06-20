@@ -19,14 +19,10 @@ return new class extends Migration
             $table->time('hora');
             $table->integer('capacidad');
             
-            // Статус занятия: по умолчанию запланировано (PROGRAMADA), 
-            // тренер сможет перевести в архив (FINALIZADA)
             $table->string('estado', 20)->default('PROGRAMADA');
             
-            // Связь с филиалом (строго обязательная)
             $table->foreignId('sede_id')->constrained('sedes')->onDelete('cascade');
             
-            // Связь с тренером из таблицы users
             $table->foreignId('entrenador_id')
                   ->nullable()
                   ->constrained('users') 

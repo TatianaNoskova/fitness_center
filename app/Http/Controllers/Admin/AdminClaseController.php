@@ -39,7 +39,6 @@ public function index(Request $request)
 
 public function store(Request $request)
 {
-    // 1. Ручная валидация вместо автоматической
     $validator = Validator::make($request->all(), [
         'nombre' => 'required|string|max:100',
         'descripcion' => 'nullable|string',
@@ -59,7 +58,6 @@ public function store(Request $request)
 
     $data = $validator->validated();
 
-    // ПРОВЕРКА: Если тренер занят
     if (Clase::esEntrenadorOcupado($data['entrenador_id'], $data['fecha'], $data['hora'])) {
         return redirect()->route('admin.clases.index', [
             'open_create' => 1, 
@@ -98,7 +96,6 @@ public function update(Request $request, $id)
         if ($request->has('hora')) $rules['hora'] = 'required|string';
     }
 
-    // 2. Ручная валидация при обновлении
     $validator = Validator::make($request->all(), $rules);
 
     if ($validator->fails()) {
@@ -132,7 +129,6 @@ public function update(Request $request, $id)
         $finalData['sede_id'] = $entrenador->sede_id;
     }
 
-    // ПРОВЕРКА ПРИ ОБНОВЛЕНИИ
     if (Clase::esEntrenadorOcupado($finalData['entrenador_id'], $finalData['fecha'], $finalData['hora'], $clase->id)) {
         return redirect()->route('admin.clases.index', [
             'edit_id' => $id, 

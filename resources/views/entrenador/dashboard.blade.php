@@ -1,4 +1,4 @@
-@extends('layouts.app') {{-- Убедитесь, что имя лейаута совпадает с вашей системой --}}
+@extends('layouts.app')
 
 @section('content')
 <div class="py-6 bg-slate-50 min-h-screen font-sans">
@@ -16,16 +16,35 @@
             </div>
         </div>
 
-        {{-- Bloque de Alertas (Mensajes de éxito o error) --}}
+        {{-- Bloque de Alertas (Mensajes de éxito o errores globales) --}}
         @if(session('success'))
-            <div class="mb-4 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center gap-2 shadow-sm">
-                <span class="font-bold">✓</span> {{ session('success') }}
+            <div id="msg-success-alert" class="mb-6 bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-xl shadow-sm flex justify-between items-start">
+                <div class="flex">
+                    <i class="bi bi-check-circle-fill text-emerald-500 text-lg mr-2"></i>
+                    <p class="text-emerald-800 font-medium">{{ session('success') }}</p>
+                </div>
+                <button type="button" onclick="document.getElementById('msg-success-alert').remove()" class="text-emerald-400 hover:text-emerald-600 transition ml-4 focus:outline-none p-0.5 rounded-lg hover:bg-emerald-100/50">
+                    <i class="bi bi-x-lg text-sm flex items-center justify-center w-4 h-4"></i>
+                </button>
             </div>
         @endif
 
-        @if(session('error'))
-            <div class="mb-4 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-center gap-2 shadow-sm">
-                <span class="font-bold">✕</span> {{ session('error') }}
+        @if ($errors->any())
+            <div id="msg-errors-alert" class="mb-6 bg-rose-50 border-l-4 border-rose-500 p-4 rounded-r-xl shadow-sm flex justify-between items-start">
+                <div class="flex flex-col flex-grow">
+                    <div class="flex items-center mb-1">
+                        <i class="bi bi-exclamation-triangle-fill text-rose-500 text-lg mr-2"></i>
+                        <p class="text-rose-800 font-bold">Por favor, corrige los siguientes errores:</p>
+                    </div>
+                    <ul class="list-disc list-inside text-sm text-rose-700 pl-2">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                <button type="button" onclick="document.getElementById('msg-errors-alert').remove()" class="text-rose-400 hover:text-rose-600 transition ml-4 focus:outline-none p-0.5 rounded-lg hover:bg-rose-100/50">
+                    <i class="bi bi-x-lg text-sm flex items-center justify-center w-4 h-4"></i>
+                </button>
             </div>
         @endif
 
@@ -33,37 +52,28 @@
         <div class="space-y-4">
             @forelse($clases as $clase)
                 @php
-                    // Validamos si la clase ya inició o pasó (Punto 1)
                     $fechaClase = \Carbon\Carbon::parse($clase->fecha . ' ' . $clase->hora);
                     $yaIniciada = \Carbon\Carbon::now()->greaterThanOrEqualTo($fechaClase);
                 @endphp
 
                 <details class="group bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                     
-                    {{-- Cabecera de la Clase (Siempre visible) --}}
+                    {{-- Cabecera de la Clase --}}
                     <summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-slate-50 transition list-none select-none border-b border-slate-100">
                         <div class="flex items-center gap-4">
-                            {{-- Flecha indicadora con animación de rotación al abrir --}}
                             <span class="transition-transform duration-200 group-open:rotate-180 text-slate-400 text-xs">
                                 ▼
                             </span>
                             <div>
                                 <h3 class="text-base font-semibold text-slate-900">{{ $clase->nombre }}</h3>
-                                <p class="text-xs text-slate-500 mt-0.5 flex flex-wrap gap-x-3 gap-y-1-5">
-                                    <span class="inline-flex items-center gap-1">
-                                        📅 {{ \Carbon\Carbon::parse($clase->fecha)->format('d/m/Y') }}
-                                    </span>
-                                    <span class="inline-flex items-center gap-1">
-                                        🕒 {{ \Carbon\Carbon::parse($clase->hora)->format('H:i') }}
-                                    </span>
-                                    <span class="inline-flex items-center gap-1">
-                                        📍 {{ $clase->sede->nombre ?? 'Sin sede asignada' }}
-                                    </span>
+                                <p class="text-xs text-slate-500 mt-0.5 flex flex-wrap gap-x-3 gap-y-1.5">
+                                    <span>📅 {{ \Carbon\Carbon::parse($clase->fecha)->format('d/m/Y') }}</span>
+                                    <span>🕒 {{ \Carbon\Carbon::parse($clase->hora)->format('H:i') }} hs</span>
+                                    <span>📍 {{ $clase->sede->nombre ?? 'Sin Sede' }}</span>
                                 </p>
                             </div>
                         </div>
                         
-                        {{-- Contador de Socios Inscritos --}}
                         <div>
                             <span class="px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-700 border border-slate-200">
                                 Inscritos: {{ $clase->socios->count() }}
@@ -97,41 +107,34 @@
                                                     {{ $socio->user->nombre }} {{ $socio->user->apellido }}
                                                 </td>
                                                 <td class="py-3 px-4 text-center whitespace-nowrap">
-                                                    @if($status === 'SI')
-                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
-                                                            ● Asistió
-                                                        </span>
-                                                    @elseif($status === 'NO')
-                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800">
-                                                            ● Faltó
-                                                        </span>
-                                                    @else
-                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
-                                                            ● Pendiente
-                                                        </span>
-                                                    @endif
+                                                    <div id="status-badge-{{ $clase->id }}-{{ $socio->user_id }}">
+                                                        @if($status === 'SI')
+                                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">● Asistió</span>
+                                                        @elseif($status === 'NO')
+                                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800">● Faltó</span>
+                                                        @else
+                                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">● Pendiente</span>
+                                                        @endif
+                                                    </div>
                                                 </td>
                                                 <td class="py-3 px-4 text-right whitespace-nowrap">
                                                     @if(!$yaIniciada)
                                                         <span class="text-xs text-slate-400 italic">No disponible hasta el inicio</span>
                                                     @else
-                                                        <form action="{{ url('/entrenador/clases/'.$clase->id.'/socio/'.$socio->user_id.'/asistencia') }}" method="POST" class="inline-flex gap-2 m-0">
-                                                            @csrf
-                                                            <button type="submit" name="asistio" value="SI" 
-                                                                {{ $status === 'SI' ? 'disabled' : '' }}
-                                                                class="px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm border
-                                                                {{ $status === 'SI' ? 'bg-slate-100 text-slate-400 cursor-not-allowed border-slate-200' : 'bg-emerald-500 hover:bg-emerald-600 text-white border-transparent' }}"
-                                                                title="Marcar Presente">
+                                                        <div class="inline-flex gap-2 m-0">
+                                                            <button type="button" 
+                                                                    onclick="cambiarAsistencia('{{ $clase->id }}', '{{ $socio->user_id }}', 'SI')"
+                                                                    class="px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm border bg-emerald-500 hover:bg-emerald-600 text-white border-transparent"
+                                                                    title="Marcar Presente">
                                                                 ✓ Presente
                                                             </button>
-                                                            <button type="submit" name="asistio" value="NO" 
-                                                                {{ $status === 'NO' ? 'disabled' : '' }}
-                                                                class="px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm border
-                                                                {{ $status === 'NO' ? 'bg-slate-100 text-slate-400 cursor-not-allowed border-slate-200' : 'bg-rose-500 hover:bg-rose-600 text-white border-transparent' }}"
-                                                                title="Marcar Ausente">
+                                                            <button type="button" 
+                                                                    onclick="cambiarAsistencia('{{ $clase->id }}', '{{ $socio->user_id }}', 'NO')"
+                                                                    class="px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm border bg-rose-500 hover:bg-rose-600 text-white border-transparent"
+                                                                    title="Marcar Ausente">
                                                                 ✗ Ausente
                                                             </button>
-                                                        </form>
+                                                        </div>
                                                     @endif
                                                 </td>
                                             </tr>
@@ -141,10 +144,9 @@
                             </div>
                         @endif
 
-                        {{-- ИСПРАВЛЕНО: Добавили кнопку переноса в архив --}}
                         <div class="mt-4 flex justify-end">
                             <form action="{{ route('entrenador.clases.finalizar', $clase->id) }}" method="POST" 
-                                  onsubmit="return confirm('¿Estás seguro de finalizar esta clase? Pasará al historial.');">
+                                  onsubmit="return confirm('¿Estás seguro de finalizar esta clase? Pasará al historial y guardará todo definitivamente.');">
                                 @csrf
                                 <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold py-2 px-4 rounded-xl transition shadow-sm inline-flex items-center gap-1.5">
                                     <i class="bi bi-archive-fill"></i> Finalizar y Archivar Clase
@@ -161,7 +163,6 @@
             @endforelse
         </div>
 
-        {{-- ИСПРАВЛЕНО: Секция истории (Архивные занятия) в самом низу панели --}}
         <div class="mt-12 border-t border-slate-200 pt-8">
             <h3 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
                 ⏱ Historial de Clases Finalizadas
@@ -180,7 +181,7 @@
                                     <h4 class="font-bold text-slate-800 text-base">{{ $h->nombre }}</h4>
                                     <p class="text-xs text-slate-500 mt-1 flex gap-3">
                                         <span>📅 {{ \Carbon\Carbon::parse($h->fecha)->format('d/m/Y') }}</span>
-                                        <span>🕒 {{ \Carbon\Carbon::parse($h->hora)->format('H:i') }}</span>
+                                        <span>🕒 {{ \Carbon\Carbon::parse($h->hora)->format('H:i') }} hs</span>
                                     </p>
                                 </div>
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
@@ -199,4 +200,26 @@
 
     </div>
 </div>
+
+<script>
+function cambiarAsistencia(claseId, socioId, valor) {
+    
+    fetch(`/entrenador/clases/${claseId}/socio/${socioId}/asistencia`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSR-Origin': window.location.origin,
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({ asistio: valor })
+    }).then(() => {
+        const badgeContainer = document.getElementById(`status-badge-${claseId}-${socioId}`);
+        if (valor === 'SI') {
+            badgeContainer.innerHTML = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">● Asistió</span>';
+        } else {
+            badgeContainer.innerHTML = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800">● Faltó</span>';
+        }
+    }).catch(err => console.error("Error al guardar asistencia:", err));
+}
+</script>
 @endsection

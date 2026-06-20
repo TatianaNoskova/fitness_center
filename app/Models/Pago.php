@@ -9,7 +9,6 @@ class Pago extends Model
 {
     use HasFactory;
 
-    // ИСПРАВЛЕНО: Добавили combo_id, servicio_id и detalles в разрешенные поля
     protected $fillable = [
         'fecha', 
         'monto', 
@@ -22,9 +21,7 @@ class Pago extends Model
         'detalles'
     ];
 
-    /**
-     * Связи (Relationships)
-     */
+    
     public function socio()
     {
         return $this->belongsTo(Socio::class, 'socio_id', 'user_id');
@@ -35,21 +32,19 @@ class Pago extends Model
         return $this->belongsTo(Plan::class, 'plan_id');
     }
 
-    // НОВАЯ СВЯЗЬ: Получить комбо, к которому относится платеж
+    
     public function combo()
     {
         return $this->belongsTo(Combo::class, 'combo_id');
     }
 
-    // НОВАЯ СВЯЗЬ: Получить одиночную услугу, к которой относится платеж
+    
     public function servicio()
     {
         return $this->belongsTo(Servicio::class, 'servicio_id');
     }
 
-    /**
-     * Методы из UML-диаграммы
-     */
+    
     public static function registrarPago(array $data)
     {
         $data['fecha'] = now()->toDateString();

@@ -23,9 +23,7 @@ class Inscripcion extends Model
         return $this->belongsTo(Clase::class);
     }
 
-    /**
-     * Методы из UML-диаграммы
-     */
+    
 
     // registrarInscripcion()
     public static function registrarInscripcion(array $data)

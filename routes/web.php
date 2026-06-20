@@ -4,15 +4,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuthController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes (Визуальный интерфейс Blade)
-|--------------------------------------------------------------------------
-*/
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Гости видят формы входа и регистрации
+// LOGIN & REGISTRO
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
@@ -28,63 +23,65 @@ Route::middleware('guest')->group(function () {
 */
 Route::middleware('auth')->group(function () {
     
-    // Выйти могут все авторизованные пользователи
+    // LOGOUT (PARA TODOS)
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // --- 1. ДОСТУП ТОЛЬКО ДЛЯ АДМИНИСТРАТОРА ---
+    // --- 1. SOLO PARA EL ADMIN ---
     Route::middleware('role:administrador')->group(function () {
-        // Главная панель админа
+        // Dashboard
         Route::get('/dashboard', function () { return view('admin.dashboard'); })->name('admin.dashboard');
         
-        // Управление дополнительными услугами (Composite)
+        // Servicios extras
         Route::get('/admin/servicios-extras', [\App\Http\Controllers\Admin\ServicioExtraController::class, 'index'])->name('composite.index');
         Route::post('/composite/toggle/{comboId}/{servicioId}', [\App\Http\Controllers\Admin\ServicioExtraController::class, 'toggleServicioEnCombo'])->name('composite.toggle');
         Route::post('/composite/servicio/store', [\App\Http\Controllers\Admin\ServicioExtraController::class, 'storeServicio'])->name('composite.servicio.store');
         Route::post('/composite/combo/store', [\App\Http\Controllers\Admin\ServicioExtraController::class, 'storeCombo'])->name('composite.combo.store');
         
-        // Управление занятиями (Clases)
+        // Clases
         Route::get('/clases-view', [\App\Http\Controllers\Admin\AdminClaseController::class, 'index'])->name('admin.clases.index');
         Route::delete('/admin/clases/{id}', [\App\Http\Controllers\Admin\AdminClaseController::class, 'destroy'])->name('admin.clases.destroy');
         Route::post('/admin/clases', [\App\Http\Controllers\Admin\AdminClaseController::class, 'store'])->name('admin.clases.store');
         Route::get('/admin/clases/{id}/edit', [\App\Http\Controllers\Admin\AdminClaseController::class, 'edit'])->name('admin.clases.edit');
         Route::put('/admin/clases/{id}', [\App\Http\Controllers\Admin\AdminClaseController::class, 'update'])->name('admin.clases.update');
 
-        // --- УПРАВЛЕНИЕ КЛИЕНТАМИ (SOCIOS) ---
+        // SOCIOS
         Route::get('/socios-view', [\App\Http\Controllers\Admin\SocioController::class, 'index'])->name('admin.socios.index');
         Route::post('/socios', [\App\Http\Controllers\Admin\SocioController::class, 'store'])->name('admin.socios.store');
         Route::put('/socios/{id}', [\App\Http\Controllers\Admin\SocioController::class, 'update'])->name('admin.socios.update');
         Route::delete('/socios/{id}', [\App\Http\Controllers\Admin\SocioController::class, 'destroy'])->name('admin.socios.destroy');
 
-        // --- УПРАВЛЕНИЕ ТРЕНЕРАМИ (ENTRENADORES) ---
+        // ENTRENADORES
         Route::get('/entrenadores-view', [\App\Http\Controllers\Admin\EntrenadorController::class, 'index'])->name('admin.entrenadores.index');
         Route::post('/entrenadores', [\App\Http\Controllers\Admin\EntrenadorController::class, 'store'])->name('admin.entrenadores.store');
         Route::put('/entrenadores/{id}', [\App\Http\Controllers\Admin\EntrenadorController::class, 'update'])->name('admin.entrenadores.update');
         Route::delete('/entrenadores/{id}', [\App\Http\Controllers\Admin\EntrenadorController::class, 'destroy'])->name('admin.entrenadores.destroy');
         Route::delete('/entrenadores/{id}/force', [\App\Http\Controllers\Admin\EntrenadorController::class, 'forceDelete'])->name('admin.entrenadores.forceDelete');
-        // --- УПРАВЛЕНИЕ ФИЛИАЛАМИ (SEDES) ---
+        
+        // SEDES
         Route::get('/sedes-view', [\App\Http\Controllers\Admin\SedeController::class, 'index'])->name('admin.sedes.index');
         Route::post('/sedes', [\App\Http\Controllers\Admin\SedeController::class, 'store'])->name('admin.sedes.store');
         Route::put('/sedes/{id}', [\App\Http\Controllers\Admin\SedeController::class, 'update'])->name('admin.sedes.update');
         Route::delete('/sedes/{id}', [\App\Http\Controllers\Admin\SedeController::class, 'destroy'])->name('admin.sedes.destroy');
         Route::delete('/socios/{id}/force', [\App\Http\Controllers\Admin\SocioController::class, 'forceDelete'])->name('admin.socios.forceDelete');         
-        // --- УПРАВЛЕНИЕ ТАРИФАМИ (PLANES) ---
+        
+        // PLANES
         Route::get('/plans-view', [\App\Http\Controllers\Admin\PlanesController::class, 'index'])->name('planes.index');
         Route::post('/planes', [\App\Http\Controllers\Admin\PlanesController::class, 'store'])->name('planes.store');
         Route::put('/planes/{id}', [\App\Http\Controllers\Admin\PlanesController::class, 'update'])->name('planes.update');
     });
     });
 
-    // --- 2. ДОСТУП ТОЛЬКО ДЛЯ ТРЕНЕРА ---
+    // --- 2. SOLO PARA EL ENTRENADOR ---
     Route::middleware('role:entrenador')->group(function () {
         Route::get('/entrenador/dashboard', [\App\Http\Controllers\Entrenador\DashboardController::class, 'index'])->name('entrenador.dashboard');
         
-        // НОВАЯ СТРОЧКА: Обработка посещаемости
+        // Asistencia
         Route::post('/entrenador/clases/{claseId}/socio/{socioId}/asistencia', [\App\Http\Controllers\Entrenador\DashboardController::class, 'marcarAsistencia']);
         Route::post('/entrenador/clases/{id}/finalizar', [\App\Http\Controllers\Entrenador\DashboardController::class, 'finalizarClase'])->name('entrenador.clases.finalizar');
     });
 
 
-    // --- 3. ДОСТУП ТОЛЬКО ДЛЯ КЛИЕНТА (SOCIO) ---
+    // --- 3. SOLO PARA EL SOCIO
     Route::middleware('role:socio')->group(function () {
         Route::get('/socio/dashboard', [\App\Http\Controllers\Socio\DashboardController::class, 'index'])->name('socio.dashboard');
         Route::post('/socio/crear-perfil', [\App\Http\Controllers\Socio\DashboardController::class, 'crearPerfil']);
@@ -92,18 +89,16 @@ Route::middleware('auth')->group(function () {
         Route::post('/socio/contratar-extras', [\App\Http\Controllers\Socio\DashboardController::class, 'contratarExtras'])->name('socio.contratar-extras');
         Route::delete('/socio/cancelar-pago/{id}', [\App\Http\Controllers\Socio\DashboardController::class, 'cancelarPago'])->name('socio.cancelarPago');    
         
-        // Запись на занятия
         Route::post('/clases/{id}/inscribir', [\App\Http\Controllers\Admin\AdminClaseController::class, 'inscribir']);
         Route::post('/clases/{id}/cancelar', [\App\Http\Controllers\Admin\AdminClaseController::class, 'cancelar']);
     });
     
-    // Общая логика записи
     Route::post('/clases/{id}/inscribir', [\App\Http\Controllers\Admin\AdminClaseController::class, 'inscribir'])->middleware('role:socio,entrenador');
 
 
 /*
 |--------------------------------------------------------------------------
-| API Routes (Бэкенд CRUD перенаправлен на Admin-контроллеры)
+| API Routes
 |--------------------------------------------------------------------------
 */
 Route::prefix('api')->group(function () {

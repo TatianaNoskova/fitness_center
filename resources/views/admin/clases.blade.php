@@ -168,7 +168,7 @@
 </div>
 
 {{-- ======================================================================= --}}
-{{-- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ И ВАЛИДАЦИИ ЗАНЯТИЯ --}}
+{{-- MODAL: EDITAR CLASE --}}
 {{-- ======================================================================= --}}
 @if(request('edit_id'))
     @php 
@@ -184,7 +184,6 @@
         <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
             <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-lg w-full overflow-hidden flex flex-col antialiased my-auto">
                 
-                {{-- Шапка --}}
                 <div class="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                     <h3 class="text-sm font-bold text-slate-900">
                         @if($tieneInscritos)
@@ -216,7 +215,6 @@
                         </div>
                     @endif
 
-                    {{-- Кастомный вывод ошибки коллизии тренера --}}
                     @if(session('error_modal'))
                         <div class="bg-rose-50 border border-rose-200 text-rose-800 rounded-xl p-3 text-xs font-semibold flex items-center gap-2">
                             <i class="bi bi-exclamation-triangle-fill text-rose-500 text-sm"></i>
@@ -227,7 +225,6 @@
                     <input type="hidden" name="selected_sede_id" value="{{ request('selected_sede_id', $claseParaEditar->sede_id) }}">
                     <input type="hidden" name="sede_id" value="{{ $claseParaEditar->sede_id }}">
 
-                    {{-- Предупреждение о записанных учениках --}}
                     @if($tieneInscritos)
                         <div class="bg-blue-50 border border-blue-100 text-blue-800 rounded-xl px-3 py-2 text-xs flex items-start gap-2">
                             <i class="bi bi-info-circle-fill text-blue-500 mt-0.5 text-sm flex-shrink-0"></i> 
@@ -237,7 +234,6 @@
                         </div>
                     @endif
 
-                    {{-- Название класса --}}
                     <div>
                         <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Nombre de la Clase</label>
                         <input type="text" name="nombre" value="{{ old('nombre', $claseParaEditar->nombre) }}" required
@@ -245,7 +241,6 @@
                             class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500/20 shadow-sm {{ $tieneInscritos ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : '' }}">
                     </div>
 
-                    {{-- Дата и Время --}}
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Fecha</label>
@@ -262,7 +257,6 @@
                         </div>
                     </div>
 
-                    {{-- Выбор Тренера --}}
                     <div>
                         <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Seleccionar Entrenador</label>
                         <select name="entrenador_id" required 
@@ -300,7 +294,6 @@
                         @endif
                     </div>
 
-                    {{-- Вместимость --}}
                     <div>
                         <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Capacidad Máxima</label>
                         <input type="number" name="capacidad" value="{{ old('capacidad', $claseParaEditar->capacidad) }}" 
@@ -313,14 +306,12 @@
                         @endif
                     </div>
 
-                    {{-- Описание --}}
                     <div>
                         <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Descripción</label>
                         <textarea name="descripcion" rows="2" placeholder="Detalles o requisitos..."
                             class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500/20 shadow-sm">{{ old('descripcion', $claseParaEditar->descripcion) }}</textarea>
                     </div>
 
-                    {{-- Подвал с кнопками --}}
                     <div class="flex justify-end gap-3 pt-3 border-t border-slate-100 mt-4">
                         <a href="{{ route('admin.clases.index', ['selected_sede_id' => request('selected_sede_id')]) }}" 
                            class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm rounded-xl transition">
@@ -339,13 +330,12 @@
 
 
 {{-- ======================================================================= --}}
-{{-- МОДАЛЬНОЕ ОКНО: СОЗДАНИЕ НОВОГО ЗАНЯТИЯ (КОМПАКТНАЯ ВЕРСИЯ) --}}
+{{-- MODAL: CREAR CLASE
 {{-- ======================================================================= --}}
 @if(request('open_create'))
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-2xl w-full overflow-hidden flex flex-col antialiased my-auto">
             
-            {{-- Шапка модального окна --}}
             <div class="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                 <h3 class="text-sm font-bold text-slate-900 flex items-center">
                     <i class="bi bi-calendar-plus-fill text-blue-600 mr-2"></i> Programar Nueva Clase
@@ -357,7 +347,6 @@
 
             <div class="p-4">
                 @if(!$selectedSedeId)
-                    {{-- ШАГ 1: ВЫБОР ФИЛИАЛА --}}
                     @if ($errors->any())
                         <div class="mb-4 bg-rose-50 border-l-4 border-rose-500 p-3 rounded-r-xl text-xs text-rose-800 font-medium">
                             <i class="bi bi-exclamation-triangle-fill text-rose-500 mr-1"></i>
@@ -391,7 +380,6 @@
                         </div>
                     </form>
                 @else
-                    {{-- ШАГ 2: ЗАПОЛНЕНИЕ ДАННЫХ ЗАНЯТИЯ --}}
                     <form action="{{ route('admin.clases.store') }}" method="POST" class="space-y-3">
                         @csrf
                         
@@ -412,7 +400,6 @@
                         <input type="hidden" name="sede_id" value="{{ $selectedSedeId }}">
                         <input type="hidden" name="selected_sede_id" value="{{ $selectedSedeId }}">
 
-                        {{-- Информационная плашка выбранного филиала --}}
                         <div class="bg-blue-50 border border-blue-100 text-blue-800 rounded-xl px-3 py-2 text-xs flex justify-between items-center">
                             <div class="flex items-center font-semibold">
                                 <i class="bi bi-geo-alt-fill mr-1.5 text-blue-500"></i> 
@@ -423,7 +410,6 @@
                             </a>
                         </div>
 
-                        {{-- Сетка полей формы --}}
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Nombre de la Clase / Deporte</label>
@@ -478,7 +464,6 @@
                             </div>
                         </div>
 
-                        {{-- Кнопки действий --}}
                         <div class="flex justify-end gap-3 pt-3 border-t border-slate-100 mt-4">
                             <a href="{{ route('admin.clases.index') }}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm rounded-xl transition">
                                 Cancelar

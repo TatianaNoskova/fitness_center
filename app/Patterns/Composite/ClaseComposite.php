@@ -6,9 +6,8 @@ class ClaseComposite implements ClaseComponent
 {
     protected string $nombreCombo;
     protected array $componentes = [];
-    protected int $descuento; // Переменная для хранения процента скидки
+    protected int $descuento; 
 
-    // Конструктор теперь принимает процент скидки (по умолчанию 0, если не передано)
     public function __construct(string $nombreCombo, int $descuento = 0)
     {
         $this->nombreCombo = $nombreCombo;
@@ -24,7 +23,6 @@ class ClaseComposite implements ClaseComponent
     {
         $texto = $this->nombreCombo . " (Paquete de " . count($this->componentes) . " servicios)";
         
-        // Если есть скидка, красиво добавим информацию об этом в название
         if ($this->descuento > 0) {
             $texto .= " [-{$this->descuento}%]";
         }
@@ -41,7 +39,6 @@ class ClaseComposite implements ClaseComponent
             $totalPrecio += $componente->getPrecio();
         }
 
-        // 2. Если у комбо в базе задана скидка, уменьшаем итоговую сумму на этот процент
         if ($this->descuento > 0) {
             $суммаСкидки = $totalPrecio * ($this->descuento / 100);
             $totalPrecio -= $суммаСкидки;

@@ -22,8 +22,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        /* Repositorio
-        $this->app->bind(SedeRepositoryInterface::class, SedeRepository::class); */
 
         //  Singleton via Service Container (El parton Estrategia)
         $this->app->singleton(CuotaContext::class, function ($app) {
